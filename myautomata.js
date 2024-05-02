@@ -3,6 +3,9 @@ class MyAutomata {
     y = 1;
     MyAutomata(game) {
         Object.assign(this, { game });
+
+        // make an array that contains 10x10 based position values.
+        // Might be easier to make this in the terminal first.
     }
 
     update() {
