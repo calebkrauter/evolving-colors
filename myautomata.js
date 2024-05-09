@@ -76,6 +76,8 @@ class MyAutomata {
         this.initGridFront();
     }
 
+    // TODO - create a method that updates the front grid using the
+    // back grid's data and following rules while staying within bounds.
     initGridFront() {
         for (let x = 0; x < gridLayers.gridBack.length; x++) {
             for (let y = 0; y < gridLayers.gridBack.length; y++) {
@@ -85,34 +87,87 @@ class MyAutomata {
         return gridLayers.gridFront;
 
     }
+    updateGridFront() {
+        for (let x = 1; x < gridLayers.gridBack.length - 1; x++) {
+            for (let y = 1; y < gridLayers.gridBack.length - 1; y++) {
+                // Check rules and update gridFront based on gridBack.
+                // xy 
+                // gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
+                // take a snapshot of current surounding 8 cells. Count how many are living.
+                let currentSnapshot = this.snapshotOfNeighborhood(x, y);
+                // let currentSnapshot = 2;
+
+                if (gridLayers.gridFront[x][y].alive && currentSnapshot < 2) {
+                    gridLayers.gridFront[x][y].alive = false;
+                }
+                if (gridLayers.gridFront[x][y].alive && (currentSnapshot === 2 || currentSnapshot === 3)) {
+                    gridLayers.gridFront[x][y].alive = true;
+                }
+                if (gridLayers.gridFront[x][y].alive && currentSnapshot > 3) {
+                    gridLayers.gridFront[x][y].alive = false;
+                }
+                if (!gridLayers.gridFront[x][y].alive && currentSnapshot === 3) {
+                    gridLayers.gridFront[x][y].alive = true;
+                }
+            }
+        }
+        return gridLayers.gridFront;
+
+    }
+    //
+
+    /* 
+    x-1,y-1 x,y-1   x+1,y-1
+    1      2     3
+    x-1,y  x,y    x+1,y
+    4      5     6
+    x-1,y+1 x,y+1 x+1,y+1
+    7      8     9
+
+    
+    */
+    snapshotOfNeighborhood(theX, theY) {
+        let aliveCellsCount = 0;
+        if (gridLayers.gridBack[theX - 1][theY - 1].alive) {
+            aliveCellsCount++;
+        }
+        if (gridLayers.gridBack[theX][theY - 1].alive) {
+            aliveCellsCount++;
+        }
+        if (gridLayers.gridBack[theX + 1][theY - 1].alive) {
+            aliveCellsCount++;
+        }
+        if (gridLayers.gridBack[theX - 1][theY].alive) {
+            aliveCellsCount++;
+        }
+        if (gridLayers.gridBack[theX + 1][theY].alive) {
+            aliveCellsCount++;
+        }
+        if (gridLayers.gridBack[theX - 1][theY + 1].alive) {
+            aliveCellsCount++;
+        }
+        if (gridLayers.gridBack[theX][theY + 1].alive) {
+            aliveCellsCount++;
+        }
+        if (gridLayers.gridBack[theX + 1][theY + 1].alive) {
+            aliveCellsCount++;
+        }
+        // console.log(aliveCellsCount)
+        return aliveCellsCount;
+    }
+
     initGridBack() {
         for (let x = 0; x < gridLayers.gridBack.length; x++) {
             for (let y = 0; y < gridLayers.gridBack.length; y++) {
                 gridLayers.gridBack[x][y] = { ...cell };
+                if (x == 0 || y == 0 || x == gridLayers.gridBack.length - 1 || y == gridLayers.gridBack.length - 1) {
+                    gridLayers.gridBack[x][y].alive = false;
+                }
 
             }
         }
         return gridLayers.gridBack;
     }
-
-    // updateGridFront() {
-
-    //     for (let x = 0; x < gridLayers.gridBack.width; x++) {
-    //         console.log("Hi")
-
-    //         for (let y = 0; y < gridLayers.gridBack.height; y++) {
-
-    //             if ((x + 1) < gridLayers.gridBack.width && gridLayers.gridBack[x + 1][y].alive) {
-    //                 gridLayers.gridFront[x + 1][y].alive = false;
-    //                 console.log("Hi")
-    //             }
-
-    //         }
-
-    //     }
-
-
-    // }
 
     testRandomLife() {
         for (let x = 0; x < gridLayers.gridBack.length; x++) {
@@ -123,27 +178,19 @@ class MyAutomata {
                 } else {
                     gridLayers.gridBack[x][y].alive = false;
                 }
-
-
-            }
-        }
-    }
-
-    updateGrid2WithRules() {
-        for (let x = 0; x < gridLayers.gridBack.length; x++) {
-            for (let y = 0; y < gridLayers.gridBack.length; y++) {
-                if (gridLayers.gridBack[x][y].alive) {
-                    gridLayers.gridFront[x][y].alive = true;
+                if (x == 0 || y == 0 || x == gridLayers.gridBack.length - 1 || y == gridLayers.gridBack.length - 1) {
+                    gridLayers.gridBack[x][y].alive = false;
                 }
 
             }
         }
     }
+
     update() {
         // this.initGridBack();
         // Test that cells are acurately set to live and die randomly.
-        this.testRandomLife();
-
+        // this.testRandomLife();
+        gridLayers.gridBack = this.updateGridFront();
         this.initGridFront();
         // To flash all cells as the same random color for each tick.
         // this.randomColors();
