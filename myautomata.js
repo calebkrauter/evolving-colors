@@ -72,10 +72,80 @@ class MyAutomata {
         // console.log(this.fillGridFront());
         this.initGridBack();
         // Test that cells are acurately set to live and die randomly.
-        this.testRandomLife();
+        // this.testRandomLife();
+        this.testAFewCells();
         this.initGridFront();
     }
 
+    testAFewCells() {
+        // square
+        gridLayers.gridBack[10][10].alive = true;
+        gridLayers.gridBack[11][10].alive = true;
+        gridLayers.gridBack[12][10].alive = true;
+
+        // boat
+        gridLayers.gridBack[20][10].alive = true;
+        gridLayers.gridBack[21][10].alive = true;
+        gridLayers.gridBack[20][9].alive = true;
+        gridLayers.gridBack[21][9].alive = true;
+
+        gridLayers.gridBack[23][8].alive = true;
+        gridLayers.gridBack[24][8].alive = true;
+        gridLayers.gridBack[23][7].alive = true;
+        gridLayers.gridBack[24][7].alive = true;
+
+        // Cross
+        gridLayers.gridBack[5 + 20][5 + 12].alive = true;
+        gridLayers.gridBack[5 + 21][5 + 12].alive = true;
+        gridLayers.gridBack[5 + 20][5 + 9].alive = true;
+        gridLayers.gridBack[5 + 21][5 + 9].alive = true;
+
+        gridLayers.gridBack[5 + 23][5 + 8].alive = true;
+        gridLayers.gridBack[5 + 24][5 + 8].alive = true;
+        gridLayers.gridBack[5 + 23][5 + 7].alive = true;
+        gridLayers.gridBack[5 + 24][5 + 7].alive = true;
+
+        // Circle
+        gridLayers.gridBack[10 + 30][10 + 10].alive = true;
+        gridLayers.gridBack[10 + 31][10 + 10].alive = true;
+        gridLayers.gridBack[10 + 30][10 + 9].alive = true;
+        gridLayers.gridBack[10 + 31][10 + 9].alive = true;
+        gridLayers.gridBack[12 + 30][10 + 10].alive = true;
+        gridLayers.gridBack[12 + 31][10 + 10].alive = true;
+        gridLayers.gridBack[12 + 30][10 + 9].alive = true;
+        gridLayers.gridBack[12 + 31][10 + 9].alive = true;
+
+        // Big dipper
+        gridLayers.gridBack[14 + 30][10 + 10].alive = true;
+        gridLayers.gridBack[14 + 31][10 + 10].alive = true;
+        gridLayers.gridBack[14 + 30][10 + 9].alive = true;
+        gridLayers.gridBack[14 + 31][10 + 9].alive = true;
+        gridLayers.gridBack[16 + 30][10 + 10].alive = true;
+        gridLayers.gridBack[16 + 31][10 + 10].alive = true;
+        gridLayers.gridBack[16 + 30][10 + 9].alive = true;
+        gridLayers.gridBack[16 + 31][10 + 9].alive = true;
+
+        gridLayers.gridBack[17 + 30][10 + 10].alive = true;
+        gridLayers.gridBack[17 + 31][10 + 10].alive = true;
+        gridLayers.gridBack[17 + 30][10 + 9].alive = true;
+        gridLayers.gridBack[17 + 31][10 + 9].alive = true;
+        gridLayers.gridBack[6 + 30][10 + 10].alive = true;
+        gridLayers.gridBack[6 + 31][10 + 10].alive = true;
+        gridLayers.gridBack[6 + 30][10 + 9].alive = true;
+        gridLayers.gridBack[6 + 31][10 + 9].alive = true;
+        // Start chaos
+        // gridLayers.gridBack[25][10].alive = true;
+        // gridLayers.gridBack[26][10].alive = true;
+        // gridLayers.gridBack[25][9].alive = true;
+        // gridLayers.gridBack[26][9].alive = true;
+
+        // gridLayers.gridBack[23][10].alive = true;
+        // gridLayers.gridBack[24][10].alive = true;
+        // gridLayers.gridBack[23][9].alive = true;
+        // gridLayers.gridBack[24][9].alive = true;
+
+
+    }
     // TODO - create a method that updates the front grid using the
     // back grid's data and following rules while staying within bounds.
     initGridFront() {
@@ -94,19 +164,16 @@ class MyAutomata {
                 // xy 
                 // gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
                 // take a snapshot of current surounding 8 cells. Count how many are living.
-                let currentSnapshot = this.snapshotOfNeighborhood(x, y);
-                // let currentSnapshot = 2;
+                let suroundingAliveCells = this.snapshotOfNeighborhood(x, y);
+                // let suroundingAliveCells = 2;
 
-                if (gridLayers.gridFront[x][y].alive && currentSnapshot < 2) {
+                if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2 || suroundingAliveCells > 3)) {
                     gridLayers.gridFront[x][y].alive = false;
                 }
-                if (gridLayers.gridFront[x][y].alive && (currentSnapshot === 2 || currentSnapshot === 3)) {
+                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells == 2) {
                     gridLayers.gridFront[x][y].alive = true;
                 }
-                if (gridLayers.gridFront[x][y].alive && currentSnapshot > 3) {
-                    gridLayers.gridFront[x][y].alive = false;
-                }
-                if (!gridLayers.gridFront[x][y].alive && currentSnapshot === 3) {
+                if (suroundingAliveCells == 3) {
                     gridLayers.gridFront[x][y].alive = true;
                 }
             }
@@ -152,7 +219,6 @@ class MyAutomata {
         if (gridLayers.gridBack[theX + 1][theY + 1].alive) {
             aliveCellsCount++;
         }
-        // console.log(aliveCellsCount)
         return aliveCellsCount;
     }
 
@@ -191,7 +257,7 @@ class MyAutomata {
         // Test that cells are acurately set to live and die randomly.
         // this.testRandomLife();
         gridLayers.gridBack = this.updateGridFront();
-        this.initGridFront();
+        // this.initGridFront();
         // To flash all cells as the same random color for each tick.
         // this.randomColors();
         this.i++;
