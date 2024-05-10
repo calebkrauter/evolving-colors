@@ -72,9 +72,14 @@ class MyAutomata {
         // console.log(this.fillGridFront());
         this.initGridBack();
         // Test that cells are acurately set to live and die randomly.
-        // this.testRandomLife();
-        this.testAFewCells();
+        this.testRandomLife();
+        // this.testAFewCells();
+        // this.testFourByFour();
         this.initGridFront();
+    }
+
+    testFourByFour() {
+
     }
 
     testAFewCells() {
@@ -167,13 +172,12 @@ class MyAutomata {
                 let suroundingAliveCells = this.snapshotOfNeighborhood(x, y);
                 // let suroundingAliveCells = 2;
 
+                // Dies from under/over population
                 if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2 || suroundingAliveCells > 3)) {
                     gridLayers.gridFront[x][y].alive = false;
-                }
-                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells == 2) {
+                } else if (gridLayers.gridFront[x][y].alive && (suroundingAliveCells == 2 || suroundingAliveCells == 3)) {
                     gridLayers.gridFront[x][y].alive = true;
-                }
-                if (suroundingAliveCells == 3) {
+                } else if (gridLayers.gridFront[x][y].alive == false && suroundingAliveCells == 3) {
                     gridLayers.gridFront[x][y].alive = true;
                 }
             }
