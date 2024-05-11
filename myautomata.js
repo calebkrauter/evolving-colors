@@ -1,7 +1,7 @@
 const cell = {
     alive: false,
-    width: 10,
-    height: 10,
+    width: 100,
+    height: 100,
     random: {
         R: Math.floor(Math.random() * 256),
         G: Math.floor(Math.random() * 256),
@@ -16,10 +16,10 @@ const cell = {
 }
 
 const gridLayers = {
-    gridBack: Array.from({ length: 100 }, () => Array.from({ length: 100 }, () => 0)),
-    gridFront: Array.from({ length: 100 }, () => Array.from({ length: 100 }, () => 0)),
-    gridWidth: 100,
-    gridHeight: 100
+    gridBack: Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => 0)),
+    gridFront: Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => 0)),
+    gridWidth: 10,
+    gridHeight: 10
 }
 
 const colorFlowType = {
@@ -72,14 +72,63 @@ class MyAutomata {
         // console.log(this.fillGridFront());
         this.initGridBack();
         // Test that cells are acurately set to live and die randomly.
-        this.testRandomLife();
+        // this.testRandomLife();
         // this.testAFewCells();
-        // this.testFourByFour();
         this.initGridFront();
+        this.updateGridFront();
+        this.testFourByFour();
     }
 
     testFourByFour() {
+        // L
+        // gridLayers.gridBack[1][2].alive = true;
+        // gridLayers.gridBack[1][3].alive = true;
+        // gridLayers.gridBack[2][3].alive = true;
+        // gridLayers.gridBack[3][3].alive = true;
 
+
+        // Tests birth upon 3 neighbors birthing 2,3
+        // gridLayers.gridBack[3][3].alive = true;
+        // gridLayers.gridBack[2][2].alive = true;
+        // gridLayers.gridBack[3][2].alive = true;
+
+        // Tests birth upon 3 neighbors birthing 1,2 by corner of grid.
+        // gridLayers.gridBack[1][1].alive = true;
+        // gridLayers.gridBack[2][2].alive = true;
+        // gridLayers.gridBack[2][1].alive = true;
+
+        // gridLayers.gridBack[1][1].alive = true;
+
+
+        // gridLayers.gridBack[2][2].alive = true;
+        // gridLayers.gridBack[3][1].alive = true;
+        // gridLayers.gridBack[1][3].alive = true;
+        // gridLayers.gridBack[3][3].alive = true;
+
+        gridLayers.gridBack[2][3].alive = true;
+        gridLayers.gridBack[3][3].alive = true;
+        gridLayers.gridBack[4][3].alive = true;
+
+
+        //
+
+        // //                  X  Y
+        // // Left wall
+        // gridLayers.gridBack[1][1].alive = true;
+        // gridLayers.gridBack[1][2].alive = true;
+        // gridLayers.gridBack[1][3].alive = true;
+        // // Floor
+        // gridLayers.gridBack[1][3].alive = true;
+        // gridLayers.gridBack[2][3].alive = true;
+        // gridLayers.gridBack[3][3].alive = true;
+        // // Right wall
+        // gridLayers.gridBack[3][1].alive = true;
+        // gridLayers.gridBack[3][2].alive = true;
+        // gridLayers.gridBack[3][3].alive = true;
+        // // Ceiling
+        // gridLayers.gridBack[1][1].alive = true;
+        // gridLayers.gridBack[2][1].alive = true;
+        // gridLayers.gridBack[3][1].alive = true;
     }
 
     testAFewCells() {
@@ -154,8 +203,8 @@ class MyAutomata {
     // TODO - create a method that updates the front grid using the
     // back grid's data and following rules while staying within bounds.
     initGridFront() {
-        for (let x = 0; x < gridLayers.gridBack.length; x++) {
-            for (let y = 0; y < gridLayers.gridBack.length; y++) {
+        for (let x = 1; x < gridLayers.gridBack.length - 1; x++) {
+            for (let y = 1; y < gridLayers.gridBack.length - 1; y++) {
                 gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
             }
         }
@@ -172,14 +221,49 @@ class MyAutomata {
                 let suroundingAliveCells = this.snapshotOfNeighborhood(x, y);
                 // let suroundingAliveCells = 2;
 
-                // Dies from under/over population
-                if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2 || suroundingAliveCells > 3)) {
+                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells < 2) {
                     gridLayers.gridFront[x][y].alive = false;
-                } else if (gridLayers.gridFront[x][y].alive && (suroundingAliveCells == 2 || suroundingAliveCells == 3)) {
-                    gridLayers.gridFront[x][y].alive = true;
-                } else if (gridLayers.gridFront[x][y].alive == false && suroundingAliveCells == 3) {
+                }
+                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells === 2) {
                     gridLayers.gridFront[x][y].alive = true;
                 }
+                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells === 3) {
+                    gridLayers.gridFront[x][y].alive = true;
+                }
+                // // // else 
+                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells > 3) {
+                    gridLayers.gridFront[x][y].alive = false;
+                }
+                // // // else 
+                if ((gridLayers.gridBack[x][y].alive === false) && suroundingAliveCells === 3) {
+                    gridLayers.gridFront[x][y].alive = true;
+                }
+
+
+                // Dies from under/over population
+                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2)) {
+                //     gridLayers.gridFront[x][y].alive = false;
+                // }
+                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells > 3)) {
+                //     gridLayers.gridFront[x][y].alive = false;
+                // }
+                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells == 2 || suroundingAliveCells == 3)) {
+                //     gridLayers.gridFront[x][y].alive = true;
+                // }
+                // if (gridLayers.gridBack[x][y].alive == false && suroundingAliveCells == 3) {
+                //     gridLayers.gridFront[x][y].alive = true;
+                // }
+                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2 || suroundingAliveCells > 3)) {
+                //     gridLayers.gridFront[x][y].alive = false;
+                // }
+
+                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells == 2 || suroundingAliveCells == 3)) {
+                //     gridLayers.gridFront[x][y].alive = true;
+                // }
+                // else 
+                // if (gridLayers.gridBack[x][y].alive == false && suroundingAliveCells == 3) {
+                //     gridLayers.gridFront[x][y].alive = true;
+                // }
             }
         }
         return gridLayers.gridFront;
@@ -198,30 +282,49 @@ class MyAutomata {
     
     */
     snapshotOfNeighborhood(theX, theY) {
+
         let aliveCellsCount = 0;
         if (gridLayers.gridBack[theX - 1][theY - 1].alive) {
             aliveCellsCount++;
+            // console.log("at 1: " + aliveCellsCount)
         }
         if (gridLayers.gridBack[theX][theY - 1].alive) {
             aliveCellsCount++;
+            // console.log("at 2: " + aliveCellsCount)
+
         }
         if (gridLayers.gridBack[theX + 1][theY - 1].alive) {
             aliveCellsCount++;
+            // console.log("at 3: " + aliveCellsCount)
+
         }
         if (gridLayers.gridBack[theX - 1][theY].alive) {
             aliveCellsCount++;
+            // console.log("at 4: " + aliveCellsCount)
+
         }
         if (gridLayers.gridBack[theX + 1][theY].alive) {
             aliveCellsCount++;
+            // console.log("at 5: " + aliveCellsCount)
+
         }
         if (gridLayers.gridBack[theX - 1][theY + 1].alive) {
             aliveCellsCount++;
+            // console.log("at 6: " + aliveCellsCount)
+
         }
         if (gridLayers.gridBack[theX][theY + 1].alive) {
             aliveCellsCount++;
+            // console.log("at 7: " + aliveCellsCount)
+
         }
         if (gridLayers.gridBack[theX + 1][theY + 1].alive) {
             aliveCellsCount++;
+            // console.log("at 3: " + aliveCellsCount)
+
+        }
+        if (theX == 2 && theY == 4) {
+            // console.log(theX + ", " + " " + theY + ": " + aliveCellsCount);
         }
         return aliveCellsCount;
     }
@@ -256,16 +359,36 @@ class MyAutomata {
         }
     }
 
+    clicked = false;
+    continue = true;
+    tick = 0;
     update() {
-        // this.initGridBack();
-        // Test that cells are acurately set to live and die randomly.
-        // this.testRandomLife();
-        gridLayers.gridBack = this.updateGridFront();
-        // this.initGridFront();
-        // To flash all cells as the same random color for each tick.
-        // this.randomColors();
-        this.i++;
-        this.cycleColors();
+        document.getElementById("myIterateButton").addEventListener("click", function () {
+            MyAutomata.clicked = true;
+            MyAutomata.continue = false;
+        })
+        document.getElementById("myContinueButton").addEventListener("click", function () {
+            MyAutomata.continue = true;
+        })
+        if (MyAutomata.clicked || MyAutomata.continue) {
+            MyAutomata.clicked = false;
+
+            this.tick++;
+            document.getElementById("ticks").textContent = "Ticks: " + this.tick;
+            // this.initGridBack();
+            // Test that cells are acurately set to live and die randomly.
+            // this.testRandomLife();
+            gridLayers.gridBack = this.updateGridFront();
+
+            // this.initGridFront();
+            // To flash all cells as the same random color for each tick.
+            // this.randomColors();
+            this.i++;
+            this.cycleColors();
+        } else {
+            MyAutomata.clicked = false;
+            MyAutomata.continue = false;
+        }
     }
 
     randomColors() {
@@ -276,12 +399,18 @@ class MyAutomata {
     }
 
     draw(ctx) {
+        let ctx2 = ctx;
 
         for (let x = 0; x < gridLayers.gridFront.length; x++) {
             for (let y = 0; y < gridLayers.gridFront.length; y++) {
 
-                this.drawGridOutline(ctx, x, y);
-
+                if (gridLayers.gridBack[x][y].alive) {
+                    // To use indvidual R G and B colors cycle
+                    ctx2.fillStyle = "Yellow";
+                    // To use random colors.
+                    // ctx.fillStyle = this.randomColors();
+                    ctx2.fillRect(x * cell.width + 10, y * cell.width + 10, cell.width, cell.height);
+                }
                 if (gridLayers.gridFront[x][y].alive) {
                     // To use indvidual R G and B colors cycle
                     ctx.fillStyle = `rgb(${this.R}, ${this.G}, ${this.B})`;
@@ -289,6 +418,7 @@ class MyAutomata {
                     // ctx.fillStyle = this.randomColors();
                     ctx.fillRect(x * cell.width + 5, y * cell.width + 5, cell.width, cell.height);
                 }
+                this.drawGridOutline(ctx, x, y);
 
             }
         }
@@ -353,8 +483,15 @@ class MyAutomata {
     }
 
     drawGridOutline(ctx, x, y) {
+
         ctx.strokeStyle = "Black";
         ctx.lineWidth = 1;
+
+        ctx.fillStyle = "Blue"
+        ctx.font = "25px Arial"
+        ctx.fillText("(" + x + ",", x * cell.width + 5, y * cell.width + 35);
+        ctx.fillText("  " + y + ")", x * cell.width + 20, y * cell.width + 35);
+
         ctx.strokeRect(x * cell.width + 5, y * cell.width + 5, cell.width, cell.height)
     }
 }
