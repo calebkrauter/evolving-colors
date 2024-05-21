@@ -17,7 +17,7 @@ const cell = {
 
 const gridLayers = {
     gridBack: Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => 0)),
-    gridFront: Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => 0)),
+    gridFront: Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => cell)),
     gridWidth: 10,
     gridHeight: 10
 }
@@ -70,13 +70,16 @@ class MyAutomata {
         // this.fillGridBack();
         // console.log(this.fillGridBack());
         // console.log(this.fillGridFront());
+        this.nextItr = false;
+
         this.initGridBack();
         // Test that cells are acurately set to live and die randomly.
         // this.testRandomLife();
         // this.testAFewCells();
+        this.testFourByFour();
+        // this.testRandomLife();
         this.initGridFront();
         this.updateGridFront();
-        this.testFourByFour();
     }
 
     testFourByFour() {
@@ -206,66 +209,102 @@ class MyAutomata {
         for (let x = 1; x < gridLayers.gridBack.length - 1; x++) {
             for (let y = 1; y < gridLayers.gridBack.length - 1; y++) {
                 gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
+                if (x == 0 || y == 0 || x == gridLayers.gridBack.length - 1 || y == gridLayers.gridBack.length - 1) {
+                    gridLayers.gridFront[x][y].alive = false;
+                }
             }
         }
         return gridLayers.gridFront;
 
     }
-    updateGridFront() {
-        for (let x = 1; x < gridLayers.gridBack.length - 1; x++) {
-            for (let y = 1; y < gridLayers.gridBack.length - 1; y++) {
-                // Check rules and update gridFront based on gridBack.
-                // xy 
-                // gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
-                // take a snapshot of current surounding 8 cells. Count how many are living.
-                let suroundingAliveCells = this.snapshotOfNeighborhood(x, y);
-                // let suroundingAliveCells = 2;
 
-                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells < 2) {
-                    gridLayers.gridFront[x][y].alive = false;
-                }
-                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells === 2) {
-                    gridLayers.gridFront[x][y].alive = true;
-                }
-                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells === 3) {
-                    gridLayers.gridFront[x][y].alive = true;
-                }
-                // // // else 
-                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells > 3) {
-                    gridLayers.gridFront[x][y].alive = false;
-                }
-                // // // else 
-                if ((gridLayers.gridBack[x][y].alive === false) && suroundingAliveCells === 3) {
-                    gridLayers.gridFront[x][y].alive = true;
-                }
-
-
-                // Dies from under/over population
-                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2)) {
-                //     gridLayers.gridFront[x][y].alive = false;
-                // }
-                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells > 3)) {
-                //     gridLayers.gridFront[x][y].alive = false;
-                // }
-                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells == 2 || suroundingAliveCells == 3)) {
-                //     gridLayers.gridFront[x][y].alive = true;
-                // }
-                // if (gridLayers.gridBack[x][y].alive == false && suroundingAliveCells == 3) {
-                //     gridLayers.gridFront[x][y].alive = true;
-                // }
-                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2 || suroundingAliveCells > 3)) {
-                //     gridLayers.gridFront[x][y].alive = false;
-                // }
-
-                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells == 2 || suroundingAliveCells == 3)) {
-                //     gridLayers.gridFront[x][y].alive = true;
-                // }
-                // else 
-                // if (gridLayers.gridBack[x][y].alive == false && suroundingAliveCells == 3) {
-                //     gridLayers.gridFront[x][y].alive = true;
-                // }
+    clearGridBack() {
+        for (let x = 0; x < gridLayers.gridBack.length; x++) {
+            for (let y = 0; y < gridLayers.gridBack.length; y++) {
+                gridLayers.gridBack[x][y].alive = false;
             }
         }
+        return gridLayers.gridBack;
+    }
+
+    clearGridFront() {
+        for (let x = 0; x < gridLayers.gridFront.length; x++) {
+            for (let y = 0; y < gridLayers.gridFront.length; y++) {
+
+                gridLayers.gridFront[x][y].alive = false;
+            }
+        }
+        return gridLayers.gridFront;
+    }
+    updateGridFront() {
+        if (this.nextItr === false) {
+            this.nextItr = true;
+            for (let x = 1; x < gridLayers.gridBack.length - 1; x++) {
+                for (let y = 1; y < gridLayers.gridBack.length - 1; y++) {
+                    // Check rules and update gridFront based on gridBack.
+                    // xy 
+                    // gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
+                    // take a snapshot of current surounding 8 cells. Count how many are living.
+                    let suroundingAliveCells = this.snapshotOfNeighborhood(x, y);
+                    // let suroundingAliveCells = 2;
+
+                    if (gridLayers.gridBack[x][y].alive && suroundingAliveCells < 2) {
+                        gridLayers.gridFront[x][y].alive = false;
+                    }
+                    if (gridLayers.gridBack[x][y].alive && suroundingAliveCells === 2) {
+                        gridLayers.gridFront[x][y].alive = true;
+                    }
+                    if (gridLayers.gridBack[x][y].alive && suroundingAliveCells === 3) {
+                        gridLayers.gridFront[x][y].alive = true;
+                    }
+                    // // // else 
+                    if (gridLayers.gridBack[x][y].alive && suroundingAliveCells > 3) {
+                        gridLayers.gridFront[x][y].alive = false;
+                    }
+                    // // // else 
+                    if (gridLayers.gridBack[x][y].alive === false && suroundingAliveCells === 3) {
+                        gridLayers.gridFront[x][y].alive = true;
+                    }
+
+                    // Dies from under/over population
+                    // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2)) {
+                    //     gridLayers.gridFront[x][y].alive = false;
+                    // }
+                    // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells > 3)) {
+                    //     gridLayers.gridFront[x][y].alive = false;
+                    // }
+                    // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells == 2 || suroundingAliveCells == 3)) {
+                    //     gridLayers.gridFront[x][y].alive = true;
+                    // }
+                    // if (gridLayers.gridBack[x][y].alive == false && suroundingAliveCells == 3) {
+                    //     gridLayers.gridFront[x][y].alive = true;
+                    // }
+                    // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2 || suroundingAliveCells > 3)) {
+                    //     gridLayers.gridFront[x][y].alive = false;
+                    // }
+
+                    // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells == 2 || suroundingAliveCells == 3)) {
+                    //     gridLayers.gridFront[x][y].alive = true;
+                    // }
+                    // else 
+                    // if (gridLayers.gridBack[x][y].alive == false && suroundingAliveCells == 3) {
+                    //     gridLayers.gridFront[x][y].alive = true;
+                    // }
+                }
+            }
+
+        } else if (this.nextItr === true) {
+            gridLayers.gridBack = gridLayers.gridFront;
+
+            // this.clearGridBack();
+            // Why does clearing the front delete the back?
+            this.clearGridFront();
+            this.nextItr = false;
+
+        }
+        // this.clearGridFront();
+
+
         return gridLayers.gridFront;
 
     }
@@ -378,8 +417,8 @@ class MyAutomata {
             // this.initGridBack();
             // Test that cells are acurately set to live and die randomly.
             // this.testRandomLife();
-            gridLayers.gridBack = this.updateGridFront();
 
+            this.updateGridFront();
             // this.initGridFront();
             // To flash all cells as the same random color for each tick.
             // this.randomColors();
