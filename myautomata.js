@@ -1,11 +1,11 @@
 const scale = {
-    gridSize: 100,
+    gridSize: 50,
 }
 
 const cell = {
     alive: false,
-    width: (100 - scale.gridSize) + 10,
-    height: (100 - scale.gridSize) + 10,
+    width: (50 - scale.gridSize) + 10,
+    height: (50 - scale.gridSize) + 10,
     random: {
         R: Math.floor(Math.random() * 256),
         G: Math.floor(Math.random() * 256),
@@ -84,13 +84,14 @@ class MyAutomata {
         // console.log(this.fillGridBack());
         // console.log(this.fillGridFront());
         this.nextItr = false;
+        MyAutomata.debugBox.checked = false;
 
         this.initGridBack();
         // Test that cells are acurately set to live and die randomly.
         // this.testRandomLife();
         // this.testAFewCells();
         // this.testFourByFour();
-        this.testRandomLife();
+        // this.testRandomLife();
         this.initGridFront();
         this.updateGridFront();
     }
@@ -254,17 +255,7 @@ class MyAutomata {
         this.nextItr = true;
         for (let x = 1; x < scale.gridSize - 1; x++) {
             for (let y = 1; y < scale.gridSize - 1; y++) {
-                // gridLayers.gridBack[x][y].width = (100 - scale.gridSize) + 10;
-                // gridLayers.gridFront[x][y].height = (100 - scale.gridSize) + 10;
-                // gridLayers.gridBack[x][y].width = (100 - scale.gridSize) + 10;
-                // gridLayers.gridFront[x][y].height = (100 - scale.gridSize) + 10;
-
-                // Check rules and update gridFront based on gridBack.
-                // xy 
-                // gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
-                // take a snapshot of current surounding 8 cells. Count how many are living.
                 let suroundingAliveCells = this.snapshotOfNeighborhood(x, y);
-                // let suroundingAliveCells = 2;
 
                 if (gridLayers.gridBack[x][y].alive && suroundingAliveCells < 2) {
                     gridLayers.gridFront[x][y].alive = false;
@@ -283,31 +274,6 @@ class MyAutomata {
                 if (gridLayers.gridBack[x][y].alive === false && suroundingAliveCells === 3) {
                     gridLayers.gridFront[x][y].alive = true;
                 }
-
-                // Dies from under/over population
-                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2)) {
-                //     gridLayers.gridFront[x][y].alive = false;
-                // }
-                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells > 3)) {
-                //     gridLayers.gridFront[x][y].alive = false;
-                // }
-                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells == 2 || suroundingAliveCells == 3)) {
-                //     gridLayers.gridFront[x][y].alive = true;
-                // }
-                // if (gridLayers.gridBack[x][y].alive == false && suroundingAliveCells == 3) {
-                //     gridLayers.gridFront[x][y].alive = true;
-                // }
-                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells < 2 || suroundingAliveCells > 3)) {
-                //     gridLayers.gridFront[x][y].alive = false;
-                // }
-
-                // if (gridLayers.gridBack[x][y].alive && (suroundingAliveCells == 2 || suroundingAliveCells == 3)) {
-                //     gridLayers.gridFront[x][y].alive = true;
-                // }
-                // else 
-                // if (gridLayers.gridBack[x][y].alive == false && suroundingAliveCells == 3) {
-                //     gridLayers.gridFront[x][y].alive = true;
-                // }
             }
         }
 
@@ -400,6 +366,7 @@ class MyAutomata {
     }
 
     testRandomLife() {
+
         for (let x = 0; x < scale.gridSize; x++) {
             for (let y = 0; y < scale.gridSize; y++) {
                 let aliveChance = Math.random();
@@ -427,7 +394,7 @@ class MyAutomata {
     getNewGrid() {
         let newGridBack = Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell));
         let newGridFront = Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell));
-        console.log(newGridFront)
+        // console.log(newGridFront)
         for (let x = 0; x < scale.gridSize; x++) {
             for (let y = 0; y < scale.gridSize; y++) {
                 if (gridLayers.gridBack[x] === undefined || gridLayers.gridBack[x][y] === undefined) {
@@ -438,14 +405,13 @@ class MyAutomata {
                     newGridFront[x][y] = gridLayers.gridFront[x][y];
                 }
 
-                // if (newGridBack || newGridFront) {
-                //     if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                //         newGridBack[x][y].alive = false;
-                //     }
-                //     if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                //         newGridFront[x][y].alive = false;
-                //     }
-                // }
+                if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
+                    newGridBack[x][y].alive = false;
+                }
+                if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
+                    newGridFront[x][y].alive = false;
+                }
+
             }
 
         }
@@ -454,34 +420,58 @@ class MyAutomata {
         gridLayers.gridFront = newGridFront;
         return [newGridBack, newGridFront];
     }
+    startRandomLife = false;
+    presetA = false;
+
+    scaleOffset = scale.gridSize;
     update() {
         document.getElementById("myIterateButton").addEventListener("click", function () {
             MyAutomata.clicked = true;
             MyAutomata.continue = false;
-        })
+        });
         document.getElementById("myContinueButton").addEventListener("click", function () {
             MyAutomata.continue = true;
+        });
+        document.getElementById("randomLifeButton").addEventListener("click", function () {
+            MyAutomata.startRandomLife = true;
+
+        })
+        document.getElementById("presetA").addEventListener("click", function () {
+            MyAutomata.presetA = true;
+
         })
 
         MyAutomata.debugBox.addEventListener("change", function () {
-            MyAutomata.debug = MyAutomata.debugBox.checked ? false : true;
+            MyAutomata.debug = MyAutomata.debugBox.checked ? true : false;
+
         })
 
         this.speed = parseInt(document.getElementById("speed").value, 10);
         this.size = parseInt(document.getElementById("size").value, 10);
-        scale.gridSize = this.size * 10;
-        this.canvas.width = (100 - scale.gridSize) + 10 + 5000;
-        this.canvas.height = (100 - scale.gridSize) + 10 + 1030;
+
+        // if (this.size <= 10) {
+        //     this.size = 10;
+        // } else {
+        //     scale.gridSize = this.size;
+
+        // }
+        scale.gridSize = this.size;
+        document.getElementById("sizeLabel").textContent = "(" + scale.gridSize + "X" + scale.gridSize + ")";
+
+        // this.canvas.width = scale.gridSize + 1030;
+        // this.canvas.height = scale.gridSize + 1030;
         gridLayers.gridBack = this.getNewGrid()[0]; //= Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell));
         gridLayers.gridFront = this.getNewGrid()[1]; //= Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell));
-
+        let i = scale.gridSize;
+        MyAutomata.scaleOffset = 0;
         for (let x = 0; x < scale.gridSize; x++) {
             for (let y = 0; y < scale.gridSize; y++) {
-                (gridLayers.gridFront[x][y]).width = (100 - scale.gridSize) + 10;
-                (gridLayers.gridFront[x][y]).height = (100 - scale.gridSize) + 10;
-                (gridLayers.gridBack[x][y]).width = (100 - scale.gridSize) + 10;
-                (gridLayers.gridBack[x][y]).height = (100 - scale.gridSize) + 10;
 
+
+                (gridLayers.gridFront[x][y]).width = (50 - scale.gridSize) + 10;
+                (gridLayers.gridFront[x][y]).height = (50 - scale.gridSize) + 10;
+                (gridLayers.gridBack[x][y]).width = (50 - scale.gridSize) + 10;
+                (gridLayers.gridBack[x][y]).height = (50 - scale.gridSize) + 10;
             }
 
         }
@@ -490,6 +480,14 @@ class MyAutomata {
 
         if (MyAutomata.clicked || MyAutomata.continue) {
             if ((this.count++ >= this.speed && this.speed != 120) || MyAutomata.clicked) {
+                if (MyAutomata.startRandomLife) {
+                    this.testRandomLife();
+                    MyAutomata.startRandomLife = false;
+                }
+                if (MyAutomata.presetA) {
+                    this.testAFewCells();
+                    MyAutomata.presetA = false;
+                }
                 this.count = 0;
                 this.tick++;
                 document.getElementById("ticks").textContent = "Ticks: " + this.tick;
