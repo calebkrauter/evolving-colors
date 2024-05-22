@@ -1,7 +1,11 @@
+const scale = {
+    gridSize: 100,
+}
+
 const cell = {
     alive: false,
-    width: 100,
-    height: 100,
+    width: (100 - scale.gridSize) + 10,
+    height: (100 - scale.gridSize) + 10,
     random: {
         R: Math.floor(Math.random() * 256),
         G: Math.floor(Math.random() * 256),
@@ -15,11 +19,12 @@ const cell = {
     }
 }
 
+
 const gridLayers = {
-    gridBack: Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => 0)),
-    gridFront: Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => cell)),
-    gridWidth: 10,
-    gridHeight: 10
+    gridBack: Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell)),
+    gridFront: Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell)),
+    gridWidth: scale.gridSize,
+    gridHeight: scale.gridSize
 }
 
 const colorFlowType = {
@@ -64,7 +69,15 @@ class MyAutomata {
 
     constructor(game) {
         Object.assign(this, { game });
+        MyAutomata.debug = false;
 
+        this.count = 0;
+        this.tick = 0;
+        this.canvas = document.getElementById("gameWorld");
+        this.speed = parseInt(document.getElementById("speed").value, 10);
+        this.size = parseInt(document.getElementById("size").value, 10);
+
+        MyAutomata.debugBox = document.getElementById("debug");
         // make an array that contains 10x10 based position values.
         // Might be easier to make this in the terminal first.
         // this.fillGridBack();
@@ -76,8 +89,8 @@ class MyAutomata {
         // Test that cells are acurately set to live and die randomly.
         // this.testRandomLife();
         // this.testAFewCells();
-        this.testFourByFour();
-        // this.testRandomLife();
+        // this.testFourByFour();
+        this.testRandomLife();
         this.initGridFront();
         this.updateGridFront();
     }
@@ -206,10 +219,10 @@ class MyAutomata {
     // TODO - create a method that updates the front grid using the
     // back grid's data and following rules while staying within bounds.
     initGridFront() {
-        for (let x = 1; x < gridLayers.gridBack.length - 1; x++) {
-            for (let y = 1; y < gridLayers.gridBack.length - 1; y++) {
+        for (let x = 1; x < scale.gridSize - 1; x++) {
+            for (let y = 1; y < scale.gridSize - 1; y++) {
                 gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
-                if (x == 0 || y == 0 || x == gridLayers.gridBack.length - 1 || y == gridLayers.gridBack.length - 1) {
+                if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
                     gridLayers.gridFront[x][y].alive = false;
                 }
             }
@@ -219,8 +232,8 @@ class MyAutomata {
     }
 
     clearGridBack() {
-        for (let x = 0; x < gridLayers.gridBack.length; x++) {
-            for (let y = 0; y < gridLayers.gridBack.length; y++) {
+        for (let x = 0; x < scale.gridSize; x++) {
+            for (let y = 0; y < scale.gridSize; y++) {
                 gridLayers.gridBack[x][y].alive = false;
             }
         }
@@ -228,8 +241,8 @@ class MyAutomata {
     }
 
     clearGridFront() {
-        for (let x = 0; x < gridLayers.gridFront.length; x++) {
-            for (let y = 0; y < gridLayers.gridFront.length; y++) {
+        for (let x = 0; x < scale.gridSize; x++) {
+            for (let y = 0; y < scale.gridSize; y++) {
 
                 gridLayers.gridFront[x][y].alive = false;
             }
@@ -239,8 +252,13 @@ class MyAutomata {
     updateGridFront() {
         // if (this.nextItr === false) {
         this.nextItr = true;
-        for (let x = 1; x < gridLayers.gridBack.length - 1; x++) {
-            for (let y = 1; y < gridLayers.gridBack.length - 1; y++) {
+        for (let x = 1; x < scale.gridSize - 1; x++) {
+            for (let y = 1; y < scale.gridSize - 1; y++) {
+                // gridLayers.gridBack[x][y].width = (100 - scale.gridSize) + 10;
+                // gridLayers.gridFront[x][y].height = (100 - scale.gridSize) + 10;
+                // gridLayers.gridBack[x][y].width = (100 - scale.gridSize) + 10;
+                // gridLayers.gridFront[x][y].height = (100 - scale.gridSize) + 10;
+
                 // Check rules and update gridFront based on gridBack.
                 // xy 
                 // gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
@@ -369,10 +387,10 @@ class MyAutomata {
     }
 
     initGridBack() {
-        for (let x = 0; x < gridLayers.gridBack.length; x++) {
-            for (let y = 0; y < gridLayers.gridBack.length; y++) {
+        for (let x = 0; x < scale.gridSize; x++) {
+            for (let y = 0; y < scale.gridSize; y++) {
                 gridLayers.gridBack[x][y] = { ...cell };
-                if (x == 0 || y == 0 || x == gridLayers.gridBack.length - 1 || y == gridLayers.gridBack.length - 1) {
+                if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
                     gridLayers.gridBack[x][y].alive = false;
                 }
 
@@ -382,15 +400,15 @@ class MyAutomata {
     }
 
     testRandomLife() {
-        for (let x = 0; x < gridLayers.gridBack.length; x++) {
-            for (let y = 0; y < gridLayers.gridBack.length; y++) {
+        for (let x = 0; x < scale.gridSize; x++) {
+            for (let y = 0; y < scale.gridSize; y++) {
                 let aliveChance = Math.random();
                 if (aliveChance > 0.5) {
                     gridLayers.gridBack[x][y].alive = true;
                 } else {
                     gridLayers.gridBack[x][y].alive = false;
                 }
-                if (x == 0 || y == 0 || x == gridLayers.gridBack.length - 1 || y == gridLayers.gridBack.length - 1) {
+                if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
                     gridLayers.gridBack[x][y].alive = false;
                 }
 
@@ -400,7 +418,42 @@ class MyAutomata {
 
     clicked = false;
     continue = true;
+
     tick = 0;
+    count = 0;
+    countdebugsChecked = 0;
+    count2 = 0;
+
+    getNewGrid() {
+        let newGridBack = Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell));
+        let newGridFront = Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell));
+        console.log(newGridFront)
+        for (let x = 0; x < scale.gridSize; x++) {
+            for (let y = 0; y < scale.gridSize; y++) {
+                if (gridLayers.gridBack[x] === undefined || gridLayers.gridBack[x][y] === undefined) {
+                    newGridBack[x][y] = { ...cell };
+                    newGridFront[x][y] = { ...cell };
+                } else {
+                    newGridBack[x][y] = gridLayers.gridBack[x][y];
+                    newGridFront[x][y] = gridLayers.gridFront[x][y];
+                }
+
+                // if (newGridBack || newGridFront) {
+                //     if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
+                //         newGridBack[x][y].alive = false;
+                //     }
+                //     if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
+                //         newGridFront[x][y].alive = false;
+                //     }
+                // }
+            }
+
+        }
+        gridLayers.gridBack = newGridBack;
+
+        gridLayers.gridFront = newGridFront;
+        return [newGridBack, newGridFront];
+    }
     update() {
         document.getElementById("myIterateButton").addEventListener("click", function () {
             MyAutomata.clicked = true;
@@ -409,21 +462,51 @@ class MyAutomata {
         document.getElementById("myContinueButton").addEventListener("click", function () {
             MyAutomata.continue = true;
         })
+
+        MyAutomata.debugBox.addEventListener("change", function () {
+            MyAutomata.debug = MyAutomata.debugBox.checked ? false : true;
+        })
+
+        this.speed = parseInt(document.getElementById("speed").value, 10);
+        this.size = parseInt(document.getElementById("size").value, 10);
+        scale.gridSize = this.size * 10;
+        this.canvas.width = (100 - scale.gridSize) + 10 + 5000;
+        this.canvas.height = (100 - scale.gridSize) + 10 + 1030;
+        gridLayers.gridBack = this.getNewGrid()[0]; //= Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell));
+        gridLayers.gridFront = this.getNewGrid()[1]; //= Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell));
+
+        for (let x = 0; x < scale.gridSize; x++) {
+            for (let y = 0; y < scale.gridSize; y++) {
+                (gridLayers.gridFront[x][y]).width = (100 - scale.gridSize) + 10;
+                (gridLayers.gridFront[x][y]).height = (100 - scale.gridSize) + 10;
+                (gridLayers.gridBack[x][y]).width = (100 - scale.gridSize) + 10;
+                (gridLayers.gridBack[x][y]).height = (100 - scale.gridSize) + 10;
+
+            }
+
+        }
+
+
+
         if (MyAutomata.clicked || MyAutomata.continue) {
+            if ((this.count++ >= this.speed && this.speed != 120) || MyAutomata.clicked) {
+                this.count = 0;
+                this.tick++;
+                document.getElementById("ticks").textContent = "Ticks: " + this.tick;
+                this.updateGridFront();
+
+                // this.initGridBack();
+                // Test that cells are acurately set to live and die randomly.
+                // this.testRandomLife();
+
+                // this.initGridFront();
+                // To flash all cells as the same random color for each tick.
+                // this.randomColors();
+                this.i++;
+                this.cycleColors();
+            }
             MyAutomata.clicked = false;
 
-            this.tick++;
-            document.getElementById("ticks").textContent = "Ticks: " + this.tick;
-            // this.initGridBack();
-            // Test that cells are acurately set to live and die randomly.
-            // this.testRandomLife();
-
-            this.updateGridFront();
-            // this.initGridFront();
-            // To flash all cells as the same random color for each tick.
-            // this.randomColors();
-            this.i++;
-            this.cycleColors();
         } else {
             MyAutomata.clicked = false;
             MyAutomata.continue = false;
@@ -440,10 +523,10 @@ class MyAutomata {
     draw(ctx) {
         let ctx2 = ctx;
 
-        for (let x = 0; x < gridLayers.gridFront.length; x++) {
-            for (let y = 0; y < gridLayers.gridFront.length; y++) {
+        for (let x = 0; x < scale.gridSize; x++) {
+            for (let y = 0; y < scale.gridSize; y++) {
 
-                if (gridLayers.gridBack[x][y].alive) {
+                if (MyAutomata.debug && gridLayers.gridBack[x][y].alive) {
                     // To use indvidual R G and B colors cycle
                     ctx2.fillStyle = "Yellow";
                     // To use random colors.
@@ -525,11 +608,13 @@ class MyAutomata {
 
         ctx.strokeStyle = "Black";
         ctx.lineWidth = 1;
+        if (MyAutomata.debug) {
 
-        ctx.fillStyle = "Blue"
-        ctx.font = "25px Arial"
-        ctx.fillText("(" + x + ",", x * cell.width + 5, y * cell.width + 35);
-        ctx.fillText("  " + y + ")", x * cell.width + 20, y * cell.width + 35);
+            ctx.fillStyle = "Blue"
+            ctx.font = "25px Arial"
+            ctx.fillText("(" + x + ",", x * cell.width + 5, y * cell.width + 35);
+            ctx.fillText("  " + y + ")", x * cell.width + 20, y * cell.width + 35);
+        }
 
         ctx.strokeRect(x * cell.width + 5, y * cell.width + 5, cell.width, cell.height)
     }
