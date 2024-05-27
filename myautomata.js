@@ -6,10 +6,19 @@ const scale = {
     gridSize: 50,
 }
 
+const lifeType = {
+    dead: 0,
+    plant: 1,
+    animat: 2,
+}
+
 const cell = {
     alive: false,
     width: (50 - scale.gridSize) + 10,
     height: (50 - scale.gridSize) + 10,
+    type: lifeType.dead,
+    maturity: 0,
+    hue: `rgb(${this.R}, ${this.G}, ${this.B})`,
 }
 
 const gridLayers = {
@@ -17,6 +26,22 @@ const gridLayers = {
     gridFront: Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell)),
     gridWidth: scale.gridSize,
     gridHeight: scale.gridSize
+}
+/**
+ * -x-y, x,-y
+ * -x,y, x,y
+ * 
+ * bounds:
+ * when x is 0
+ * when y is 0
+ * when x is length-1
+ * when y is length -1
+ */
+const bounds = {
+    north: 0,
+    south: gridLayers.gridHeight,
+    east: gridLayers.gridWidth,
+    west: 0,
 }
 
 class MyAutomata {
@@ -83,9 +108,9 @@ class MyAutomata {
         for (let x = 1; x < scale.gridSize - 1; x++) {
             for (let y = 1; y < scale.gridSize - 1; y++) {
                 gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
-                if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                    gridLayers.gridFront[x][y].alive = false;
-                }
+                // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
+                //     gridLayers.gridFront[x][y].alive = false;
+                // }
             }
         }
         return gridLayers.gridFront;
@@ -118,9 +143,28 @@ class MyAutomata {
 
     }
 
+    /*
+     * For wrap around just use mod operator. Do current index mod length. 
+     */
     snapshotOfNeighborhood(theX, theY) {
         let aliveCellsCount = 0;
-        if (gridLayers.gridBack[theX - 1][theY - 1].alive) {
+        let xOffset = 0;
+        let yOffset = 0;
+        if (theY === bounds.north) {
+            yOffset = bounds.south;
+        }
+        if (theY === bounds.south) {
+            yOffset = bounds.north;
+        }
+        if (theX === bounds.east) {
+            xOffset = bounds.west;
+        }
+        if (theX === bounds.west) {
+            xOffset = bounds.east;
+        }
+
+
+        if (gridLayers.gridBack[theX - 1 + xOffset][theY - 1 + yOffset].alive) {
             aliveCellsCount++;
         }
         if (gridLayers.gridBack[theX][theY - 1].alive) {
@@ -151,9 +195,9 @@ class MyAutomata {
         for (let x = 0; x < scale.gridSize; x++) {
             for (let y = 0; y < scale.gridSize; y++) {
                 gridLayers.gridBack[x][y] = { ...cell };
-                if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                    gridLayers.gridBack[x][y].alive = false;
-                }
+                // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
+                //     gridLayers.gridBack[x][y].alive = false;
+                // }
 
             }
         }
@@ -170,9 +214,9 @@ class MyAutomata {
                 } else {
                     gridLayers.gridBack[x][y].alive = false;
                 }
-                if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                    gridLayers.gridBack[x][y].alive = false;
-                }
+                // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
+                //     gridLayers.gridBack[x][y].alive = false;
+                // }
 
             }
         }
@@ -190,12 +234,12 @@ class MyAutomata {
                     newGridBack[x][y] = gridLayers.gridBack[x][y];
                     newGridFront[x][y] = gridLayers.gridFront[x][y];
                 }
-                if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                    newGridBack[x][y].alive = false;
-                }
-                if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                    newGridFront[x][y].alive = false;
-                }
+                // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
+                //     newGridBack[x][y].alive = false;
+                // }
+                // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
+                //     newGridFront[x][y].alive = false;
+                // }
             }
         }
         gridLayers.gridBack = newGridBack;
