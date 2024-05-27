@@ -104,9 +104,11 @@ class MyAutomata {
         gridLayers.gridBack[3][1].alive = true;
         gridLayers.gridBack[4][1].alive = true;
     }
+
+
     initGridFront() {
-        for (let x = 1; x < scale.gridSize - 1; x++) {
-            for (let y = 1; y < scale.gridSize - 1; y++) {
+        for (let x = 0; x < scale.gridSize; x++) {
+            for (let y = 0; y < scale.gridSize; y++) {
                 gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
                 // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
                 //     gridLayers.gridFront[x][y].alive = false;
@@ -118,23 +120,27 @@ class MyAutomata {
     }
     updateGridFront() {
         this.nextItr = true;
-        for (let x = 1; x < scale.gridSize - 1; x++) {
-            for (let y = 1; y < scale.gridSize - 1; y++) {
-                let suroundingAliveCells = this.snapshotOfNeighborhood(x, y);
+        for (let x = 0; x < scale.gridSize; x++) {
 
-                if (gridLayers.gridBack[x][y].alive && suroundingAliveCells < 2) {
-                    gridLayers.gridFront[x][y].alive = false;
-                } else if (gridLayers.gridBack[x][y].alive && suroundingAliveCells === 2) {
-                    gridLayers.gridFront[x][y].alive = true;
+            for (let y = 0; y < scale.gridSize; y++) {
+
+                let suroundingAliveCells = this.snapshotOfNeighborhood(x, y);
+                let curX = x; // this.getWrapAroundVal(x);
+                let curY = y;// this.getWrapAroundVal(y);
+
+                if (gridLayers.gridBack[curX][curY].alive && suroundingAliveCells < 2) {
+                    gridLayers.gridFront[curX][curY].alive = false;
+                } else if (gridLayers.gridBack[curX][curY].alive && suroundingAliveCells === 2) {
+                    gridLayers.gridFront[curX][curY].alive = true;
                 }
-                else if (gridLayers.gridBack[x][y].alive && suroundingAliveCells === 3) {
-                    gridLayers.gridFront[x][y].alive = true;
+                else if (gridLayers.gridBack[curX][curY].alive && suroundingAliveCells === 3) {
+                    gridLayers.gridFront[curX][curY].alive = true;
                 }
-                else if (gridLayers.gridBack[x][y].alive && suroundingAliveCells > 3) {
-                    gridLayers.gridFront[x][y].alive = false;
+                else if (gridLayers.gridBack[curX][curY].alive && suroundingAliveCells > 3) {
+                    gridLayers.gridFront[curX][curY].alive = false;
                 }
-                else if (gridLayers.gridBack[x][y].alive === false && suroundingAliveCells === 3) {
-                    gridLayers.gridFront[x][y].alive = true;
+                else if (gridLayers.gridBack[curX][curY].alive === false && suroundingAliveCells === 3) {
+                    gridLayers.gridFront[curX][curY].alive = true;
                 }
             }
         }
@@ -148,49 +154,38 @@ class MyAutomata {
      */
     snapshotOfNeighborhood(theX, theY) {
         let aliveCellsCount = 0;
-        let xOffset = 0;
-        let yOffset = 0;
-        if (theY === bounds.north) {
-            yOffset = bounds.south;
-        }
-        if (theY === bounds.south) {
-            yOffset = bounds.north;
-        }
-        if (theX === bounds.east) {
-            xOffset = bounds.west;
-        }
-        if (theX === bounds.west) {
-            xOffset = bounds.east;
-        }
-
-
-        if (gridLayers.gridBack[theX - 1 + xOffset][theY - 1 + yOffset].alive) {
+        // console.log(gridLayers.gridWidth)
+        if (gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY - 1)].alive) {
             aliveCellsCount++;
         }
-        if (gridLayers.gridBack[theX][theY - 1].alive) {
+        if (gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY - 1)].alive) {
             aliveCellsCount++;
         }
-        if (gridLayers.gridBack[theX + 1][theY - 1].alive) {
+        if (gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY - 1)].alive) {
             aliveCellsCount++;
         }
-        if (gridLayers.gridBack[theX - 1][theY].alive) {
+        if (gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY)].alive) {
             aliveCellsCount++;
         }
-        if (gridLayers.gridBack[theX + 1][theY].alive) {
+        if (gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY)].alive) {
             aliveCellsCount++;
         }
-        if (gridLayers.gridBack[theX - 1][theY + 1].alive) {
+        if (gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY + 1)].alive) {
             aliveCellsCount++;
         }
-        if (gridLayers.gridBack[theX][theY + 1].alive) {
+        if (gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY + 1)].alive) {
             aliveCellsCount++;
         }
-        if (gridLayers.gridBack[theX + 1][theY + 1].alive) {
+        if (gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY + 1)].alive) {
             aliveCellsCount++;
         }
         return aliveCellsCount;
     }
 
+    getWrapAroundVal(theCurVal) {
+        // console.log(theCurVal % gridLayers.gridWidth + " gridlayerwidth " + gridLayers.gridWidth + " curVal " + theCurVal)
+        return Math.abs(theCurVal % gridLayers.gridWidth);
+    }
     initGridBack() {
         for (let x = 0; x < scale.gridSize; x++) {
             for (let y = 0; y < scale.gridSize; y++) {
@@ -283,6 +278,7 @@ class MyAutomata {
                     this.runPresetB();
                     MyAutomata.presetB = false;
                 }
+
                 this.count = 0;
                 this.tick++;
                 document.getElementById("ticks").textContent = "Ticks: " + this.tick;
@@ -319,7 +315,6 @@ class MyAutomata {
         document.getElementById("presetB").addEventListener("click", function () {
             MyAutomata.presetB = true;
         });
-
         MyAutomata.debugBox.addEventListener("change", function () {
             MyAutomata.debug = MyAutomata.debugBox.checked ? true : false;
 
