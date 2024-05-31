@@ -18,7 +18,9 @@ const cell = {
     height: (50 - scale.gridSize) + 10,
     type: lifeType.dead,
     maturity: 0,
-    hue: `rgb(${this.R}, ${this.G}, ${this.B})`,
+    h: 0,
+    s: 0,
+    l: 0,
 }
 
 const gridLayers = {
@@ -118,11 +120,18 @@ class MyAutomata {
         return gridLayers.gridFront;
 
     }
+    // static hueI = 0;
     updateGridFront() {
+        // hueI++;
+        // if (hueI >= 360) {
+        //     hueI = 0;
+        // }
+
         this.nextItr = true;
         for (let x = 0; x < scale.gridSize; x++) {
 
             for (let y = 0; y < scale.gridSize; y++) {
+
 
                 let suroundingAliveCells = this.snapshotOfNeighborhood(x, y);
                 let curX = x; // this.getWrapAroundVal(x);
@@ -142,6 +151,22 @@ class MyAutomata {
                 else if (gridLayers.gridBack[curX][curY].alive === false && suroundingAliveCells === 3) {
                     gridLayers.gridFront[curX][curY].alive = true;
                 }
+                if (gridLayers.gridFront[curX][curY].alive) {
+                    if (gridLayers.gridFront[curX][curY].maturity >= 360) {
+                        gridLayers.gridFront[curX][curY].maturity = gridLayers.gridFront[curX][curY].maturity = 360;
+                    }
+                    // if (gridLayers.gridFront[curX][curY].maturity < 0) {
+                    //     gridLayers.gridFront[curX][curY].maturity = gridLayers.gridFront[curX][curY].maturity * -1;
+
+                    // }
+                    gridLayers.gridFront[curX][curY].maturity++;
+                    gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
+                    gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].maturity;
+                    gridLayers.gridFront[curX][curY].l = 50;
+
+
+                }
+
             }
         }
         gridLayers.gridBack = structuredClone(gridLayers.gridFront);
@@ -351,7 +376,8 @@ class MyAutomata {
                 }
                 if (gridLayers.gridFront[x][y].alive) {
                     // To use indvidual R G and B colors cycle
-                    ctx.fillStyle = `rgb(${this.R}, ${this.G}, ${this.B})`;
+                    // ctx.fillStyle = `rgb(${this.R}, ${this.G}, ${this.B})`;
+                    ctx.fillStyle = hsl(gridLayers.gridFront[x][y].h, gridLayers.gridFront[x][y].s, gridLayers.gridFront[x][y].l);
                     if (MyAutomata.sourSkittlesMode) {
                         ctx.fillStyle = this.randomColors();
                     }
