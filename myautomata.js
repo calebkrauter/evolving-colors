@@ -159,6 +159,7 @@ class MyAutomata {
                     //     gridLayers.gridFront[curX][curY].maturity = gridLayers.gridFront[curX][curY].maturity * -1;
 
                     // }
+                    gridLayers.gridFront[curX][curY].type = lifeType.plant;
                     gridLayers.gridFront[curX][curY].maturity++;
                     gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
                     gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].maturity;
@@ -382,7 +383,17 @@ class MyAutomata {
                         ctx.fillStyle = this.randomColors();
                     }
                     // To use random colors.
-                    ctx.fillRect(x * cell.width + 5, y * cell.width + 5, cell.width, cell.height);
+                    // context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+                    ctx.beginPath();
+                    if (gridLayers.gridFront[x][y].type === lifeType.plant) {
+                        ctx.fillRect(x * cell.width + 5, y * cell.width + 5, cell.width, cell.height);
+                    }
+                    if (gridLayers.gridFront[x][y].type === lifeType.animat) {
+                        ctx.arc(x * cell.width + 10, y * cell.width + 10, cell.width / 4, 0, 2 * Math.PI, false);
+                    }
+                    // ctx.arc(x * cell.width, y * cell.width, cell.width / 4, 0, 2 * Math.PI, false);
+                    ctx.fill();
+                    ctx.stroke();
                 }
                 if (MyAutomata.enableGrid) {
                     this.drawGridOutline(ctx, x, y);
