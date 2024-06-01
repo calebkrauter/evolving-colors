@@ -18,11 +18,24 @@ const cell = {
     height: (50 - scale.gridSize) + 10,
     type: lifeType.dead,
     maturity: 0,
+    isMature: false,
     h: 0,
     s: 0,
     l: 0,
+    numOfLivingHere: 0,
 }
-
+const cellDefaultState = {
+    alive: false,
+    width: (50 - scale.gridSize) + 10,
+    height: (50 - scale.gridSize) + 10,
+    type: lifeType.dead,
+    maturity: 0,
+    isMature: false,
+    h: 0,
+    s: 0,
+    l: 0,
+    numOfLivingHere: 0,
+}
 const gridLayers = {
     gridBack: Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell)),
     gridFront: Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell)),
@@ -83,6 +96,8 @@ class MyAutomata {
         this.initGridBack();
         this.initGridFront();
         this.updateGridFront();
+        console.log(this.getWrapAroundVal(-1));
+
     }
 
 
@@ -120,6 +135,7 @@ class MyAutomata {
         return gridLayers.gridFront;
 
     }
+
     // static hueI = 0;
     updateGridFront() {
         // hueI++;
@@ -137,33 +153,53 @@ class MyAutomata {
                 let curX = x; // this.getWrapAroundVal(x);
                 let curY = y;// this.getWrapAroundVal(y);
 
-                if (gridLayers.gridBack[curX][curY].alive && suroundingAliveCells < 2) {
-                    gridLayers.gridFront[curX][curY].alive = false;
-                } else if (gridLayers.gridBack[curX][curY].alive && suroundingAliveCells === 2) {
+
+                // if (gridLayers.gridBack[curX][curY].alive && gridLayers.gridFront[curX][curY].maturity >= 360 && !gridLayers.gridFront[curX][curY].isMature) {
+                //     gridLayers.gridFront[curX][curY].alive = true;
+                //     // gridLayers.gridFront[curX][curY].numOfLivingHere++;
+                //     // console.log(gridLayers.gridFront[curX][curY].numOfLivingHere)
+                //     gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].maturity - gridLayers.gridFront[curX][curY].numOfLivingHere;
+
+                // }
+                if (gridLayers.gridBack[curX][curY].alive) {
                     gridLayers.gridFront[curX][curY].alive = true;
+                    console.log("ALIVE")
                 }
-                else if (gridLayers.gridBack[curX][curY].alive && suroundingAliveCells === 3) {
-                    gridLayers.gridFront[curX][curY].alive = true;
+                if (gridLayers.gridBack[curX][curY].alive && Math.random() < 0.01) {
+                    gridLayers.gridFront[curX][curY] = structuredClone(cellDefaultState);
                 }
-                else if (gridLayers.gridBack[curX][curY].alive && suroundingAliveCells > 3) {
-                    gridLayers.gridFront[curX][curY].alive = false;
-                }
-                else if (gridLayers.gridBack[curX][curY].alive === false && suroundingAliveCells === 3) {
-                    gridLayers.gridFront[curX][curY].alive = true;
-                }
+                let s = gridLayers.gridFront[curX][curY].maturity;
                 if (gridLayers.gridFront[curX][curY].alive) {
                     if (gridLayers.gridFront[curX][curY].maturity >= 360) {
+                        console.log(gridLayers.gridFront[curX][curY]);
+
+                        let randomNewPlant = Math.floor(Math.random() * 8);
+                        let birthLocation = this.birthNewCell(curX, curY, randomNewPlant);
                         gridLayers.gridFront[curX][curY].maturity = gridLayers.gridFront[curX][curY].maturity = 360;
+                        if (birthLocation[0] == curX && birthLocation[1] == curY) {
+                            gridLayers.gridFront[curX][curY].numOfLivingHere++;
+                        }
+
+                        // gridLayers.gridFront[curX][curY].isMature = true;
+                    } else {
+                        gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].maturity;
+
                     }
                     // if (gridLayers.gridFront[curX][curY].maturity < 0) {
                     //     gridLayers.gridFront[curX][curY].maturity = gridLayers.gridFront[curX][curY].maturity * -1;
 
                     // }
+                    // if (gridLayers.gridFront[curX][curY].isMature) {
+                    //     gridLayers.gridFront[curX][curY].h = 360;
+
+                    // }
+                    // else {
+
                     gridLayers.gridFront[curX][curY].type = lifeType.plant;
                     gridLayers.gridFront[curX][curY].maturity++;
                     gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
-                    gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].maturity;
                     gridLayers.gridFront[curX][curY].l = 50;
+                    // }
 
 
                 }
@@ -207,10 +243,55 @@ class MyAutomata {
         }
         return aliveCellsCount;
     }
+    birthNewCell(theX, theY, theNeighbor) {
+        let birthLocation = [];
+        theNeighbor = 0;
+        switch (theNeighbor) {
+            case 0:
+                gridLayers.gridFront[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY - 1)].alive = true;
+                birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY - 1)];
+                break;
+            case 1:
+                gridLayers.gridFront[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY - 1)].alive = true
+                birthLocation = [this.getWrapAroundVal(theX), this.getWrapAroundVal(theY - 1)];
+
+                break;
+            case 2:
+                gridLayers.gridFront[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY - 1)].alive = true
+                birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY - 1)];
+
+                break;
+            case 3:
+                gridLayers.gridFront[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY)].alive = true
+                birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY)];
+
+                break;
+            case 4:
+                gridLayers.gridFront[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY)].alive = true
+                birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY)];
+
+                break;
+            case 5:
+                gridLayers.gridFront[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY + 1)].alive = true
+                birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY + 1)];
+
+                break;
+            case 6:
+                gridLayers.gridFront[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY + 1)].alive = true
+                birthLocation = [this.getWrapAroundVal(theX), this.getWrapAroundVal(theY + 1)];
+                break;
+            case 7:
+                gridLayers.gridFront[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY + 1)].alive = true
+                birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY + 1)];
+                break;
+        }
+        console.log(birthLocation);
+        return birthLocation;
+    }
 
     getWrapAroundVal(theCurVal) {
         // console.log(theCurVal % gridLayers.gridWidth + " gridlayerwidth " + gridLayers.gridWidth + " curVal " + theCurVal)
-        return Math.abs(theCurVal % gridLayers.gridWidth);
+        return ((theCurVal % scale.gridSize) + scale.gridSize) % scale.gridSize;
     }
     initGridBack() {
         for (let x = 0; x < scale.gridSize; x++) {
