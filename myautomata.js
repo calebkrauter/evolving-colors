@@ -132,40 +132,22 @@ class MyAutomata {
         for (let x = 0; x < scale.gridSize; x++) {
             for (let y = 0; y < scale.gridSize; y++) {
                 gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
-                // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                //     gridLayers.gridFront[x][y].alive = false;
-                // }
             }
         }
         return gridLayers.gridFront;
 
     }
 
-    // static hueI = 0;
     updateGridFront() {
-        // hueI++;
-        // if (hueI >= 360) {
-        //     hueI = 0;
-        // }
 
         this.nextItr = true;
         for (let x = 0; x < scale.gridSize; x++) {
 
             for (let y = 0; y < scale.gridSize; y++) {
 
+                let curX = x;
+                let curY = y;
 
-                let suroundingAliveCells = this.snapshotOfNeighborhood(x, y);
-                let curX = x; // this.getWrapAroundVal(x);
-                let curY = y;// this.getWrapAroundVal(y);
-
-
-                // if (gridLayers.gridBack[curX][curY].alive && gridLayers.gridFront[curX][curY].maturity >= 360 && !gridLayers.gridFront[curX][curY].isMature) {
-                //     gridLayers.gridFront[curX][curY].alive = true;
-                //     // gridLayers.gridFront[curX][curY].numOfLivingHere++;
-                //     // console.log(gridLayers.gridFront[curX][curY].numOfLivingHere)
-                //     gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].maturity - gridLayers.gridFront[curX][curY].numOfLivingHere;
-
-                // }
                 if (gridLayers.gridBack[curX][curY].alive) {
                     gridLayers.gridFront[curX][curY].alive = true;
                     console.log("ALIVE")
@@ -173,38 +155,25 @@ class MyAutomata {
                 if (gridLayers.gridBack[curX][curY].alive && Math.random() < 0.01) {
                     gridLayers.gridFront[curX][curY] = structuredClone(cellDefaultState);
                 }
-                let s = gridLayers.gridFront[curX][curY].maturity;
                 if (gridLayers.gridFront[curX][curY].alive) {
                     if (gridLayers.gridFront[curX][curY].maturity >= MyAutomata.maturitySlider.value) {
-                        console.log(gridLayers.gridFront[curX][curY]);
-
                         let randomNewPlant = Math.floor(Math.random() * 8);
-                        let birthLocation = this.birthNewCell(curX, curY, randomNewPlant);
-                        gridLayers.gridFront[curX][curY].maturity = gridLayers.gridFront[curX][curY].maturity = MyAutomata.maturitySlider.value;
-                        if (birthLocation[0] == curX && birthLocation[1] == curY) {
-                            gridLayers.gridFront[curX][curY].numOfLivingHere++;
-                        }
+                        let birthedCellLocation = this.birthNewCell(curX, curY, randomNewPlant);
+                        // gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].h = 1 + gridLayers.gridFront[curX][curY].maturity * (5 - 1);
 
-                        // gridLayers.gridFront[curX][curY].isMature = true;
                     } else {
-                        gridLayers.gridFront[curX][curY].s = 1 + gridLayers.gridFront[curX][curY].maturity * (360 - 1);
+                        // gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].maturity;
 
                     }
-                    // if (gridLayers.gridFront[curX][curY].maturity < 0) {
-                    //     gridLayers.gridFront[curX][curY].maturity = gridLayers.gridFront[curX][curY].maturity * -1;
-
-                    // }
-                    // if (gridLayers.gridFront[curX][curY].isMature) {
-                    //     gridLayers.gridFront[curX][curY].h = 360;
-
-                    // }
-                    // else {
+                    if (gridLayers.gridFront[curX][curY].maturity >= 360) {
+                        gridLayers.gridFront[curX][curY].maturity = 360;
+                    }
 
                     gridLayers.gridFront[curX][curY].type = lifeType.plant;
                     gridLayers.gridFront[curX][curY].maturity++;
                     gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
                     gridLayers.gridFront[curX][curY].l = 50;
-                    // }
+
 
 
                 }
