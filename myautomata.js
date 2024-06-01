@@ -70,6 +70,9 @@ class MyAutomata {
         MyAutomata.sourSkittlesBox = document.getElementById("sourSkittlesMode");
         MyAutomata.speedSlider = document.getElementById("speed");
         MyAutomata.speedSlider.value = 15;
+        MyAutomata.maturitySlider = document.getElementById("maturity");
+        MyAutomata.maturitySlider.value = 100;
+
         MyAutomata.sourSkittlesMode = false;
         MyAutomata.sourSkittlesBox.checked = false;
         MyAutomata.gridBox.checked = true;
@@ -88,6 +91,8 @@ class MyAutomata {
         this.tick = 0;
         this.canvas = document.getElementById("gameWorld");
         this.speed = parseInt(document.getElementById("speed").value, 10);
+        this.maturity = parseInt(document.getElementById("maturity").value, 10);
+
         this.size = parseInt(document.getElementById("size").value, 10);
         this.sizeSlider = document.getElementById("size");
         this.sizeSlider.value = 50;
@@ -170,19 +175,19 @@ class MyAutomata {
                 }
                 let s = gridLayers.gridFront[curX][curY].maturity;
                 if (gridLayers.gridFront[curX][curY].alive) {
-                    if (gridLayers.gridFront[curX][curY].maturity >= 360) {
+                    if (gridLayers.gridFront[curX][curY].maturity >= MyAutomata.maturitySlider.value) {
                         console.log(gridLayers.gridFront[curX][curY]);
 
                         let randomNewPlant = Math.floor(Math.random() * 8);
                         let birthLocation = this.birthNewCell(curX, curY, randomNewPlant);
-                        gridLayers.gridFront[curX][curY].maturity = gridLayers.gridFront[curX][curY].maturity = 360;
+                        gridLayers.gridFront[curX][curY].maturity = gridLayers.gridFront[curX][curY].maturity = MyAutomata.maturitySlider.value;
                         if (birthLocation[0] == curX && birthLocation[1] == curY) {
                             gridLayers.gridFront[curX][curY].numOfLivingHere++;
                         }
 
                         // gridLayers.gridFront[curX][curY].isMature = true;
                     } else {
-                        gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].maturity;
+                        gridLayers.gridFront[curX][curY].s = 1 + gridLayers.gridFront[curX][curY].maturity * (360 - 1);
 
                     }
                     // if (gridLayers.gridFront[curX][curY].maturity < 0) {
@@ -245,47 +250,39 @@ class MyAutomata {
     }
     birthNewCell(theX, theY, theNeighbor) {
         let birthLocation = [];
-        theNeighbor = 0;
         switch (theNeighbor) {
             case 0:
-                gridLayers.gridFront[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY - 1)].alive = true;
                 birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY - 1)];
                 break;
             case 1:
-                gridLayers.gridFront[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY - 1)].alive = true
                 birthLocation = [this.getWrapAroundVal(theX), this.getWrapAroundVal(theY - 1)];
 
                 break;
             case 2:
-                gridLayers.gridFront[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY - 1)].alive = true
                 birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY - 1)];
 
                 break;
             case 3:
-                gridLayers.gridFront[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY)].alive = true
                 birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY)];
 
                 break;
             case 4:
-                gridLayers.gridFront[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY)].alive = true
                 birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY)];
 
                 break;
             case 5:
-                gridLayers.gridFront[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY + 1)].alive = true
                 birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY + 1)];
 
                 break;
             case 6:
-                gridLayers.gridFront[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY + 1)].alive = true
                 birthLocation = [this.getWrapAroundVal(theX), this.getWrapAroundVal(theY + 1)];
                 break;
             case 7:
-                gridLayers.gridFront[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY + 1)].alive = true
                 birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY + 1)];
                 break;
         }
-        console.log(birthLocation);
+        gridLayers.gridFront[birthLocation[0]][birthLocation[1]].alive = true;
+        gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = gridLayers.gridFront[theX][theY].s + 1;
         return birthLocation;
     }
 
@@ -352,6 +349,8 @@ class MyAutomata {
     update() {
         this.listenToUserInput();
         this.speed = parseInt(document.getElementById("speed").value, 10);
+        this.maturity = parseInt(document.getElementById("maturity").value, 10);
+
         this.size = parseInt(document.getElementById("size").value, 10);
         scale.gridSize = this.size;
 
