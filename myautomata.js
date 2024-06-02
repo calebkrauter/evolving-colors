@@ -73,7 +73,8 @@ class MyAutomata {
         MyAutomata.speedSlider.value = 15;
         MyAutomata.maturitySlider = document.getElementById("maturity");
         MyAutomata.maturitySlider.value = 50;
-
+        MyAutomata.animatGrowthSlider = document.getElementById("animatGrowth");
+        MyAutomata.animatGrowthSlider.value = 50;
         MyAutomata.sourSkittlesMode = false;
         MyAutomata.sourSkittlesBox.checked = false;
         MyAutomata.gridBox.checked = true;
@@ -93,6 +94,7 @@ class MyAutomata {
         this.canvas = document.getElementById("gameWorld");
         this.speed = parseInt(document.getElementById("speed").value, 10);
         this.maturity = parseInt(document.getElementById("maturity").value, 10);
+        this.animatGrowth = parseInt(document.getElementById("animatGrowth").value, 10);
 
         this.size = parseInt(document.getElementById("size").value, 10);
         this.sizeSlider = document.getElementById("size");
@@ -165,9 +167,8 @@ class MyAutomata {
                     if (gridLayers.gridBack[curX][curY].animat) {
 
                         // TODO Update this to use a slider for animat growth
-                        // TODO make sure that plants cannot override animats.
                         // console.log(gridLayers.gridFront[curX][curY].maturity);
-                        if (gridLayers.gridFront[curX][curY].maturity >= MyAutomata.maturitySlider.value) {
+                        if (gridLayers.gridFront[curX][curY].maturity >= MyAutomata.animatGrowthSlider.value) {
                             let animat = true;
                             let birthedCellLocation = this.birthNewCell(curX, curY, 0, animat);
                             gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
@@ -344,6 +345,7 @@ class MyAutomata {
         //     console.log(deltas[k]);
 
         // }
+        console.log(theNeighbor);
         // theNeighbor = deltas.indexOf((Math.min(...deltas)));
         switch (theNeighbor) {
             case 0:
@@ -380,10 +382,10 @@ class MyAutomata {
                 break;
         }
         if (animat) {
-            gridLayers.gridBack[birthLocation[0]][birthLocation[1]].plant = false;
-            gridLayers.gridBack[birthLocation[0]][birthLocation[1]].alive = false;
             gridLayers.gridBack[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
             gridLayers.gridFront[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
+            gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[theX][theY].h;
+
             gridLayers.gridBack[theX][theY] = structuredClone(cellDefaultState);
             gridLayers.gridFront[theX][theY] = structuredClone(cellDefaultState);
             gridLayers.gridBack[birthLocation[0]][birthLocation[1]].alive = true;
@@ -459,6 +461,7 @@ class MyAutomata {
         this.listenToUserInput();
         this.speed = parseInt(document.getElementById("speed").value, 10);
         this.maturity = parseInt(document.getElementById("maturity").value, 10);
+        this.animatGrowth = parseInt(document.getElementById("animatGrowth").value, 10);
 
         this.size = parseInt(document.getElementById("size").value, 10);
         scale.gridSize = this.size;
@@ -582,7 +585,7 @@ class MyAutomata {
                         ctx.fillRect(x * cell.width + 5, y * cell.width + 5, cell.width, cell.height);
                     }
                     if (gridLayers.gridFront[x][y].animat) {
-                        ctx.arc(x * cell.width + 10, y * cell.width + 10, cell.width / 4, 0, 2 * Math.PI, false);
+                        ctx.arc(x * cell.width + 10, y * cell.width + 10, cell.width / 2, 0, 2 * Math.PI, false);
                     }
                     // ctx.arc(x * cell.width, y * cell.width, cell.width / 4, 0, 2 * Math.PI, false);
                     ctx.fill();
