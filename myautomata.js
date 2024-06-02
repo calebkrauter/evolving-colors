@@ -6,35 +6,35 @@ const scale = {
     gridSize: 50,
 }
 
-const lifeType = {
-    dead: 0,
-    plant: 1,
-    animat: 2,
+
+const cellDefaultState = {
+    alive: false,
+    width: (50 - scale.gridSize) + 10,
+    height: (50 - scale.gridSize) + 10,
+    animat: false,
+    plant: false,
+    maturity: 0,
+    isMature: false,
+    h: 0,
+    s: 0,
+    l: 0,
+    numOfLivingHere: 0,
+    animatsHere: [/*cellDefaultState*/],
 }
 
 const cell = {
     alive: false,
     width: (50 - scale.gridSize) + 10,
     height: (50 - scale.gridSize) + 10,
-    type: lifeType.dead,
+    animat: false,
+    plant: false,
     maturity: 0,
     isMature: false,
     h: 0,
     s: 0,
     l: 0,
     numOfLivingHere: 0,
-}
-const cellDefaultState = {
-    alive: false,
-    width: (50 - scale.gridSize) + 10,
-    height: (50 - scale.gridSize) + 10,
-    type: lifeType.dead,
-    maturity: 0,
-    isMature: false,
-    h: 0,
-    s: 0,
-    l: 0,
-    numOfLivingHere: 0,
+    animatsHere: [/*cellDefaultState*/],
 }
 const gridLayers = {
     gridBack: Array.from({ length: scale.gridSize }, () => Array.from({ length: scale.gridSize }, () => cell)),
@@ -63,6 +63,7 @@ class MyAutomata {
 
     constructor(game) {
         Object.assign(this, { game });
+
         MyAutomata.debug = false;
         MyAutomata.debugBox = document.getElementById("debug");
         MyAutomata.gridBox = document.getElementById("grid");
@@ -71,7 +72,7 @@ class MyAutomata {
         MyAutomata.speedSlider = document.getElementById("speed");
         MyAutomata.speedSlider.value = 15;
         MyAutomata.maturitySlider = document.getElementById("maturity");
-        MyAutomata.maturitySlider.value = 100;
+        MyAutomata.maturitySlider.value = 50;
 
         MyAutomata.sourSkittlesMode = false;
         MyAutomata.sourSkittlesBox.checked = false;
@@ -131,7 +132,7 @@ class MyAutomata {
     initGridFront() {
         for (let x = 0; x < scale.gridSize; x++) {
             for (let y = 0; y < scale.gridSize; y++) {
-                gridLayers.gridFront[x][y] = { ...gridLayers.gridBack[x][y] };
+                gridLayers.gridFront[x][y] = structuredClone(gridLayers.gridBack[x][y]);
             }
         }
         return gridLayers.gridFront;
@@ -139,40 +140,58 @@ class MyAutomata {
     }
 
     updateGridFront() {
+        // for (let i = 0; i < scale.gridSize; i++) {
+        //     for (let j = 0; j < scale.gridSize; j++) {
+        //         console.log(gridLayers.gridBack[i][j]);
+        //     }
 
+        // }
         this.nextItr = true;
         for (let x = 0; x < scale.gridSize; x++) {
 
             for (let y = 0; y < scale.gridSize; y++) {
-
                 let curX = x;
                 let curY = y;
+                // console.log(gridLayers.gridBack[curX][curY]);
+                if (gridLayers.gridBack[curX][curY].plant) {
+                    // console.log("PLANT")
 
-                if (gridLayers.gridBack[curX][curY].alive) {
-                    gridLayers.gridFront[curX][curY].alive = true;
-                    console.log("ALIVE")
-                }
-                if (gridLayers.gridBack[curX][curY].alive && Math.random() < 0.01) {
-                    gridLayers.gridFront[curX][curY] = structuredClone(cellDefaultState);
-                }
-                if (gridLayers.gridFront[curX][curY].alive) {
-                    if (gridLayers.gridFront[curX][curY].maturity >= MyAutomata.maturitySlider.value) {
-                        let randomNewPlant = Math.floor(Math.random() * 8);
-                        let birthedCellLocation = this.birthNewCell(curX, curY, randomNewPlant);
-                        // gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].h = 1 + gridLayers.gridFront[curX][curY].maturity * (5 - 1);
+                    if (gridLayers.gridBack[curX][curY].alive) {
+                        gridLayers.gridFront[curX][curY].alive = true;
+                        // console.log("ALIVE")
 
-                    } else {
-                        // gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].maturity;
+                        if (gridLayers.gridBack[curX][curY].alive && Math.random() < 0.01) {
+                            gridLayers.gridFront[curX][curY] = structuredClone(cellDefaultState);
+                        }
+                        if (gridLayers.gridFront[curX][curY].alive) {
+                            if (gridLayers.gridFront[curX][curY].maturity >= MyAutomata.maturitySlider.value) {
+                                let randomNewPlant = Math.floor(Math.random() * 8);
+                                let birthedCellLocation = this.birthNewCell(curX, curY, randomNewPlant);
+                                // gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].h = 1 + MyAutomata.maturitySlider.value * (360 - 1);
 
+                            } else {
+                                // gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].maturity;
+
+                            }
+                            if (gridLayers.gridFront[curX][curY].maturity >= 360) {
+                                gridLayers.gridFront[curX][curY].maturity = 360;
+                            }
+
+                            gridLayers.gridFront[curX][curY].plant = true;
+                            gridLayers.gridFront[curX][curY].maturity++;
+                            gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
+                            gridLayers.gridFront[curX][curY].l = 50;
+                        }
+                        if (gridLayers.gridBack[curX][curY].animat) {
+                            // console.log("ANIMAT")
+                        }
+                        if (gridLayers.gridBack[curX][curY].alive && gridLayers.gridBack[curX][curY].animat) {
+                            gridLayers.gridFront[curX][curY].alive = true;
+                            gridLayers.gridFront[curX][curY].animat = true;
+                        }
                     }
-                    if (gridLayers.gridFront[curX][curY].maturity >= 360) {
-                        gridLayers.gridFront[curX][curY].maturity = 360;
-                    }
 
-                    gridLayers.gridFront[curX][curY].type = lifeType.plant;
-                    gridLayers.gridFront[curX][curY].maturity++;
-                    gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
-                    gridLayers.gridFront[curX][curY].l = 50;
+
 
 
 
@@ -262,30 +281,32 @@ class MyAutomata {
     initGridBack() {
         for (let x = 0; x < scale.gridSize; x++) {
             for (let y = 0; y < scale.gridSize; y++) {
-                gridLayers.gridBack[x][y] = { ...cell };
-                // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                //     gridLayers.gridBack[x][y].alive = false;
-                // }
-
+                gridLayers.gridBack[x][y] = structuredClone(cellDefaultState);
             }
         }
         return gridLayers.gridBack;
     }
 
     testRandomLife() {
-
         for (let x = 0; x < scale.gridSize; x++) {
             for (let y = 0; y < scale.gridSize; y++) {
                 let aliveChance = Math.random();
+                let aliveChanceAnimat = Math.random();
                 if (aliveChance > 0.5) {
                     gridLayers.gridBack[x][y].alive = true;
-                } else {
-                    gridLayers.gridBack[x][y].alive = false;
-                }
-                // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                //     gridLayers.gridBack[x][y].alive = false;
-                // }
+                    gridLayers.gridBack[x][y].alive = true;
+                    gridLayers.gridBack[x][y].plant = true;
 
+                } else {
+                    gridLayers.gridBack[x][y].alive = structuredClone(cellDefaultState);
+                }
+                if (aliveChanceAnimat > 0.5) {
+                    gridLayers.gridBack[x][y].alive = true;
+                    gridLayers.gridBack[x][y].animat = true;
+
+                } else {
+                    gridLayers.gridBack[x][y].alive = structuredClone(cellDefaultState);
+                }
             }
         }
     }
@@ -296,22 +317,16 @@ class MyAutomata {
         for (let x = 0; x < scale.gridSize; x++) {
             for (let y = 0; y < scale.gridSize; y++) {
                 if (gridLayers.gridBack[x] === undefined || gridLayers.gridBack[x][y] === undefined) {
-                    newGridBack[x][y] = { ...cell };
-                    newGridFront[x][y] = { ...cell };
+                    newGridBack[x][y] = structuredClone(cellDefaultState);
+                    newGridFront[x][y] = structuredClone(cellDefaultState);
                 } else {
-                    newGridBack[x][y] = gridLayers.gridBack[x][y];
-                    newGridFront[x][y] = gridLayers.gridFront[x][y];
+                    newGridBack[x][y] = structuredClone(gridLayers.gridBack[x][y]);
+                    newGridFront[x][y] = structuredClone(gridLayers.gridFront[x][y]);
                 }
-                // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                //     newGridBack[x][y].alive = false;
-                // }
-                // if (x == 0 || y == 0 || x == scale.gridSize - 1 || y == scale.gridSize - 1) {
-                //     newGridFront[x][y].alive = false;
-                // }
             }
         }
-        gridLayers.gridBack = newGridBack;
-        gridLayers.gridFront = newGridFront;
+        // gridLayers.gridBack = structuredClone(newGridBack);
+        // gridLayers.gridFront = structuredClone(newGridFront);
         return [newGridBack, newGridFront];
     }
 
@@ -325,8 +340,8 @@ class MyAutomata {
 
         document.getElementById("sizeLabel").textContent = "(" + scale.gridSize + "X" + scale.gridSize + ")";
 
-        gridLayers.gridBack = this.getNewGrid()[0];
-        gridLayers.gridFront = this.getNewGrid()[1];
+        gridLayers.gridBack = structuredClone(this.getNewGrid()[0]);
+        gridLayers.gridFront = structuredClone(this.getNewGrid()[1]);
         let i = scale.gridSize;
         MyAutomata.scaleOffset = 0;
         for (let x = 0; x < scale.gridSize; x++) {
@@ -343,7 +358,10 @@ class MyAutomata {
             if ((this.count++ >= this.speed && this.speed != 120) || MyAutomata.clicked) {
                 if (MyAutomata.startRandomLife) {
                     this.testRandomLife();
+                    // console.log("HI")
+
                     MyAutomata.startRandomLife = false;
+                    MyAutomata.randomLifeButton = false;
                 }
                 if (MyAutomata.presetA) {
                     this.runPresetA();
@@ -357,6 +375,7 @@ class MyAutomata {
                 this.count = 0;
                 this.tick++;
                 document.getElementById("ticks").textContent = "Ticks: " + this.tick;
+
                 this.updateGridFront();
 
                 if (MyAutomata.chaoticMode) {
@@ -434,10 +453,10 @@ class MyAutomata {
                     // To use random colors.
                     // context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
                     ctx.beginPath();
-                    if (gridLayers.gridFront[x][y].type === lifeType.plant) {
+                    if (gridLayers.gridFront[x][y].plant) {
                         ctx.fillRect(x * cell.width + 5, y * cell.width + 5, cell.width, cell.height);
                     }
-                    if (gridLayers.gridFront[x][y].type === lifeType.animat) {
+                    if (gridLayers.gridFront[x][y].animat) {
                         ctx.arc(x * cell.width + 10, y * cell.width + 10, cell.width / 4, 0, 2 * Math.PI, false);
                     }
                     // ctx.arc(x * cell.width, y * cell.width, cell.width / 4, 0, 2 * Math.PI, false);
