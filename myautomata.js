@@ -207,8 +207,9 @@ class MyAutomata {
                     gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].animat = true;
                     gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].alive = true;
                     gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].l = 50;
-                    if (gridLayers.gridFront[curX][curY].maturity >= 1000) {
-                        gridLayers.gridFront[curX][curY].maturity = 1000;
+                    gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].maturity -= 2;
+                    if (gridLayers.gridFront[curX][curY].maturity < -50) {
+                        gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]] = structuredClone(cellDefaultState);
                     }
                 }
                 if (gridLayers.gridBack[curX][curY].plant) {
