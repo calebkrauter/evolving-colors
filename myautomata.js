@@ -72,7 +72,7 @@ class MyAutomata {
         MyAutomata.speedSlider = document.getElementById("speed");
         MyAutomata.speedSlider.value = 15;
         MyAutomata.maturitySlider = document.getElementById("maturity");
-        MyAutomata.maturitySlider.value = 50;
+        MyAutomata.maturitySlider.value = 25;
         MyAutomata.animatGrowthSlider = document.getElementById("animatGrowth");
         MyAutomata.animatGrowthSlider.value = 50;
         MyAutomata.sourSkittlesMode = false;
@@ -162,36 +162,36 @@ class MyAutomata {
 
                 }
                 if (gridLayers.gridBack[curX][curY].animat && gridLayers.gridBack[curX][curY].alive) {
-                    gridLayers.gridFront[curX][curY].alive = true;
-                    gridLayers.gridFront[curX][curY].animat = true;
+                    // console.log(gridLayers.gridBack[curX][curY])
+                    // gridLayers.gridFront[curX][curY].alive = true;
+                    // gridLayers.gridFront[curX][curY].animat = true;
                     // TODO Update this to use a slider for animat growth
                     // console.log(gridLayers.gridFront[curX][curY].maturity);
-                    // if (gridLayers.gridFront[curX][curY].maturity >= MyAutomata.animatGrowthSlider.value) {
                     let animat = true;
                     let curS = gridLayers.gridFront[curX][curY].s;
                     let birthedCellLocation = this.birthNewCell(curX, curY, 0, animat);
                     // console.log(birthedCellLocation);
+                    if (gridLayers.gridFront[curX][curY].maturity >= MyAutomata.animatGrowthSlider.value) {
+                        // console.log("CLONE")
+                        let numOfClones = Math.floor(gridLayers.gridFront[curX][curY].maturity / 5) + 1;
+                        // console.log(gridLayers.gridFront[curX][curY].maturity);
+
+                        for (let i = 0; i < numOfClones; i++) {
+                            let birthedCellLocationClone = this.birthNewCell(curX, curY, 0, animat);
+                            // gridLayers.gridFront[curX][curY].h += gridLayers.gridFront[curX][curY].maturity;
+                            gridLayers.gridFront[birthedCellLocationClone[0]][birthedCellLocationClone[1]].animat = true;
+                            gridLayers.gridFront[birthedCellLocationClone[0]][birthedCellLocationClone[1]].alive = true;
+                            gridLayers.gridFront[birthedCellLocationClone[0]][birthedCellLocationClone[1]].l = 50;
+
+                        }
+                    }
                     // gridLayers.gridFront[curX][curY].h += gridLayers.gridFront[curX][curY].maturity;
                     gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].animat = true;
                     gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].alive = true;
                     gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].l = 50;
-
-
-                    // gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]] = structuredClone(cellDefaultState);
-                    // gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].h = gridLayers.gridFront[curX][curY].maturity;
-                    // } else {
-                    //     gridLayers.gridFront[curX][curY].alive = true;
-                    //     gridLayers.gridFront[curX][curY].animat = true;
-                    // }
-
-
-                    if (gridLayers.gridFront[curX][curY].maturity >= 360) {
-                        gridLayers.gridFront[curX][curY].maturity = 360;
+                    if (gridLayers.gridFront[curX][curY].maturity >= 1000) {
+                        gridLayers.gridFront[curX][curY].maturity = 1000;
                     }
-
-                    // gridLayers.gridFront[curX][curY].animat = true;
-                    // gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
-                    // gridLayers.gridFront[curX][curY].l = 75;
                 }
                 if (gridLayers.gridBack[curX][curY].plant) {
                     // console.log("PLANT")
@@ -228,6 +228,7 @@ class MyAutomata {
                     gridLayers.gridFront[curX][curY].plant = false;
                 }
             }
+
 
         }
         gridLayers.gridBack = structuredClone(gridLayers.gridFront);
@@ -432,19 +433,25 @@ class MyAutomata {
                     break;
             }
             if (animat) {
-                // console.log(theNeighbor);
                 let eatenH = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h;
                 let eatenS = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s;
+                let plantEnergy = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity;
+                let curAnimatEnergy = gridLayers.gridFront[theX][theY].maturity;
                 gridLayers.gridBack[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
                 gridLayers.gridFront[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
                 // gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[theX][theY].h;
 
                 gridLayers.gridBack[theX][theY] = structuredClone(cellDefaultState);
                 gridLayers.gridFront[theX][theY] = structuredClone(cellDefaultState);
-                gridLayers.gridBack[birthLocation[0]][birthLocation[1]].alive = true;
-                gridLayers.gridBack[birthLocation[0]][birthLocation[1]].animat = true;
                 gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h + .5 * (eatenH - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h);
                 gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s + .5 * (eatenS - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s);
+                gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity += curAnimatEnergy;
+                gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity += plantEnergy;
+                if (gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity >= 1000) {
+                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity = 1000;
+                }
+                console.log(gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity);
+
                 // gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = 300;
 
             }
@@ -458,7 +465,7 @@ class MyAutomata {
             birthLocation[0] = theX;
             birthLocation[1] = theY;
         }
-
+        // console.log(birthLocation);
 
         return birthLocation;
     }
@@ -531,8 +538,8 @@ class MyAutomata {
 
         document.getElementById("sizeLabel").textContent = "(" + scale.gridSize + "X" + scale.gridSize + ")";
 
-        gridLayers.gridBack = structuredClone(this.getNewGrid()[0]);
-        gridLayers.gridFront = structuredClone(this.getNewGrid()[1]);
+        gridLayers.gridBack = (this.getNewGrid()[0]);
+        gridLayers.gridFront = (this.getNewGrid()[1]);
         let i = scale.gridSize;
         MyAutomata.scaleOffset = 0;
         for (let x = 0; x < scale.gridSize; x++) {
