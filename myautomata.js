@@ -463,8 +463,8 @@ class MyAutomata {
 
                     gridLayers.gridBack[theX][theY] = structuredClone(cellDefaultState);
                     gridLayers.gridFront[theX][theY] = structuredClone(cellDefaultState);
-                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h + .5 * (eatenH - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h);
-                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s + .5 * (eatenS - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s);
+                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h + .5 * (eatenH - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h) + (Math.random() * 5);
+                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s + .5 * (eatenS - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s) + (Math.random() * 5);
                     gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity += curAnimatEnergy;
                     gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity += plantEnergy;
                     if (gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity >= 1000) {
