@@ -5,7 +5,7 @@
 const scale = {
     gridSize: 50,
 }
-
+// TODO make it so that animats always eat every tick.
 
 const cellDefaultState = {
     alive: false,
@@ -159,36 +159,39 @@ class MyAutomata {
                 }
                 if (gridLayers.gridFront[curX][curY].alive) {
                     gridLayers.gridFront[curX][curY].maturity++;
-                    gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
 
                 }
                 if (gridLayers.gridBack[curX][curY].animat && gridLayers.gridBack[curX][curY].alive) {
+                    gridLayers.gridFront[curX][curY].alive = true;
+                    gridLayers.gridFront[curX][curY].animat = true;
+                    // TODO Update this to use a slider for animat growth
+                    // console.log(gridLayers.gridFront[curX][curY].maturity);
+                    // if (gridLayers.gridFront[curX][curY].maturity >= MyAutomata.animatGrowthSlider.value) {
+                    let animat = true;
+                    let curS = gridLayers.gridFront[curX][curY].s;
+                    let birthedCellLocation = this.birthNewCell(curX, curY, 0, animat);
+                    // console.log(birthedCellLocation);
+                    // gridLayers.gridFront[curX][curY].h += gridLayers.gridFront[curX][curY].maturity;
+                    gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].animat = true;
+                    gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].alive = true;
+                    gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].l = 50;
 
-                    if (gridLayers.gridBack[curX][curY].animat) {
 
-                        // TODO Update this to use a slider for animat growth
-                        // console.log(gridLayers.gridFront[curX][curY].maturity);
-                        if (gridLayers.gridFront[curX][curY].maturity >= MyAutomata.animatGrowthSlider.value) {
-                            let animat = true;
-                            let birthedCellLocation = this.birthNewCell(curX, curY, 0, animat);
-                            gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
-                            // gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].animat = true;
-                            gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].l = 50;
-                            // gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]] = structuredClone(cellDefaultState);
-                            gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].h = gridLayers.gridFront[curX][curY].maturity;
-                        } else {
-                            gridLayers.gridFront[curX][curY].alive = true;
-                            gridLayers.gridFront[curX][curY].animat = true;
-                        }
+                    // gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]] = structuredClone(cellDefaultState);
+                    // gridLayers.gridFront[birthedCellLocation[0]][birthedCellLocation[1]].h = gridLayers.gridFront[curX][curY].maturity;
+                    // } else {
+                    //     gridLayers.gridFront[curX][curY].alive = true;
+                    //     gridLayers.gridFront[curX][curY].animat = true;
+                    // }
 
-                    }
+
                     if (gridLayers.gridFront[curX][curY].maturity >= 360) {
                         gridLayers.gridFront[curX][curY].maturity = 360;
                     }
 
                     // gridLayers.gridFront[curX][curY].animat = true;
-                    gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
-                    gridLayers.gridFront[curX][curY].l = 50;
+                    // gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
+                    // gridLayers.gridFront[curX][curY].l = 75;
                 }
                 if (gridLayers.gridBack[curX][curY].plant) {
                     // console.log("PLANT")
@@ -215,6 +218,8 @@ class MyAutomata {
 
                             gridLayers.gridFront[curX][curY].plant = true;
                             gridLayers.gridFront[curX][curY].h = gridLayers.gridFront[curX][curY].maturity;
+                            gridLayers.gridFront[curX][curY].s = gridLayers.gridFront[curX][curY].s + 1;
+
                             gridLayers.gridFront[curX][curY].l = 50;
                         }
                     }
@@ -267,138 +272,194 @@ class MyAutomata {
         let curDelta = 0;
         let curCellHue = gridLayers.gridBack[theX][theY].h;
         // console.log(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY - 1)].h);
+        let curCellS = gridLayers.gridBack[theX][theY].s;
+
         let deltas = [];
         let size = 0;
+        let noPlantsNear = true;
+        let eatDiscriminator = 25; // Max delta between animat and food color should be around 47 when not infinite due to DNE.
         if (animat === true) {
             if (gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY - 1)].alive) {
                 size++;
-                curDelta = Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY - 1)].h);
+                curDelta += Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY - 1)].h);
+                curDelta += Math.abs(curCellS - gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY - 1)].s);
+
                 // delta = curDelta < delta ? curDelta : delta;
                 deltas.push(curDelta);
+                curDelta = 0;
                 theNeighbor = deltas.indexOf((Math.min(...deltas)));
+                noPlantsNear = false;
             }
             if (gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY - 1)].alive) {
                 size++;
 
-                curDelta = Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY - 1)].h);
+                curDelta += Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY - 1)].h);
+                curDelta += Math.abs(curCellS - gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY - 1)].s);
 
                 // delta = curDelta < delta ? curDelta : delta;
                 deltas.push(curDelta);
+                curDelta = 0;
+
                 theNeighbor = deltas.indexOf((Math.min(...deltas)));
+                noPlantsNear = false;
             }
             if (gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY - 1)].alive) {
                 size++;
 
-                curDelta = Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY - 1)].h);
+                curDelta += Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY - 1)].h);
+                curDelta += Math.abs(curCellS - gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY - 1)].s);
 
                 // delta = curDelta < delta ? curDelta : delta;
                 deltas.push(curDelta);
+                curDelta = 0;
+
                 theNeighbor = deltas.indexOf((Math.min(...deltas)));
+                noPlantsNear = false;
             }
             if (gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY)].alive) {
                 size++;
 
-                curDelta = Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY)].h);
+                curDelta += Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY)].h);
+                curDelta += Math.abs(curCellS - gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY)].s);
 
                 // delta = curDelta < delta ? curDelta : delta;
                 deltas.push(curDelta);
+                curDelta = 0;
+
                 theNeighbor = deltas.indexOf((Math.min(...deltas)));
+                noPlantsNear = false;
             }
             if (gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY)].alive) {
                 size++;
 
-                curDelta = Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY)].h);
+                curDelta += Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY)].h);
+                curDelta += Math.abs(curCellS - gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY)].s);
 
                 // delta = curDelta < delta ? curDelta : delta;
                 deltas.push(curDelta);
+                curDelta = 0;
+
                 theNeighbor = deltas.indexOf((Math.min(...deltas)));
+                noPlantsNear = false;
             }
             if (gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY + 1)].alive) {
                 size++;
 
-                curDelta = Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY + 1)].h);
+                curDelta += Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY + 1)].h);
+                curDelta += Math.abs(curCellS - gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY + 1)].s);
 
                 // delta = curDelta < delta ? curDelta : delta;
                 deltas.push(curDelta);
+                curDelta = 0;
+
                 theNeighbor = deltas.indexOf((Math.min(...deltas)));
+                noPlantsNear = false;
             }
             if (gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY + 1)].alive) {
                 size++;
 
-                curDelta = Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY + 1)].h);
+                curDelta += Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY + 1)].h);
+                curDelta += Math.abs(curCellS - gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY + 1)].s);
 
                 // delta = curDelta < delta ? curDelta : delta;
                 deltas.push(curDelta);
+                curDelta = 0;
+
                 theNeighbor = deltas.indexOf((Math.min(...deltas)));
+                noPlantsNear = false;
             }
             if (gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY + 1)].alive) {
                 size++;
 
-                curDelta = Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY + 1)].h);
+                curDelta += Math.abs(curCellHue - gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY + 1)].h);
+                curDelta += Math.abs(curCellS - gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY + 1)].s);
 
                 // delta = curDelta < delta ? curDelta : delta;
                 deltas.push(curDelta);
+                curDelta = 0;
+
                 theNeighbor = deltas.indexOf((Math.min(...deltas)));
+                noPlantsNear = false;
             }
-        }
-        // for (let k = 0; k < size; k++) {
-        //     console.log(deltas[k]);
 
-        // }
-        console.log(theNeighbor);
-        // theNeighbor = deltas.indexOf((Math.min(...deltas)));
-        switch (theNeighbor) {
-            case 0:
-                birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY - 1)];
-                // gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY - 1)] = structuredClone(cellDefaultState);
-                break;
-            case 1:
-                birthLocation = [this.getWrapAroundVal(theX), this.getWrapAroundVal(theY - 1)];
-                // gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY - 1)] = structuredClone(cellDefaultState);
-                break;
-            case 2:
-                birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY - 1)];
-                // gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY - 1)] = structuredClone(cellDefaultState);
-                break;
-            case 3:
-                birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY)];
-                // gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY)] = structuredClone(cellDefaultState);
-                break;
-            case 4:
-                birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY)];
-                // gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY)] = structuredClone(cellDefaultState);
-                break;
-            case 5:
-                birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY + 1)];
-                // gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY + 1)] = structuredClone(cellDefaultState);
-                break;
-            case 6:
-                birthLocation = [this.getWrapAroundVal(theX), this.getWrapAroundVal(theY + 1)];
-                // gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY + 1)] = structuredClone(cellDefaultState);
-                break;
-            case 7:
-                birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY + 1)];
-                // gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY + 1)] = structuredClone(cellDefaultState);
-                break;
-        }
-        if (animat) {
-            gridLayers.gridBack[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
-            gridLayers.gridFront[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
-            gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[theX][theY].h;
-
-            gridLayers.gridBack[theX][theY] = structuredClone(cellDefaultState);
-            gridLayers.gridFront[theX][theY] = structuredClone(cellDefaultState);
-            gridLayers.gridBack[birthLocation[0]][birthLocation[1]].alive = true;
-            gridLayers.gridBack[birthLocation[0]][birthLocation[1]].animat = true;
-            gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = gridLayers.gridFront[theX][theY].s + 1;
+            // console.log(Math.max(...deltas));
+            if (noPlantsNear) {
+                theNeighbor = Math.floor(Math.random() * 8);
+            }
 
         }
-        if (!gridLayers.gridBack[birthLocation[0]][birthLocation[1]].animat && !animat) {
-            gridLayers.gridBack[birthLocation[0]][birthLocation[1]].alive = true;
-            gridLayers.gridFront[birthLocation[0]][birthLocation[1]].alive = true;
-            gridLayers.gridFront[birthLocation[0]][birthLocation[1]].plant = true;
-            gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = gridLayers.gridFront[theX][theY].s + 1;
+        for (let k = 0; k < size; k++) {
+            if (deltas[k] === deltas[theNeighbor] && k === size - 1) {
+                theNeighbor = Math.floor(Math.random() * 8);
+            }
+
         }
+        if (!animat || (Math.min(...deltas) != -1 && Math.min(...deltas) < 25) || noPlantsNear) {
+            // console.log(theNeighbor);
+            // theNeighbor = deltas.indexOf((Math.min(...deltas)));
+            switch (theNeighbor) {
+                case 0:
+                    birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY - 1)];
+                    // gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY - 1)] = structuredClone(cellDefaultState);
+                    break;
+                case 1:
+                    birthLocation = [this.getWrapAroundVal(theX), this.getWrapAroundVal(theY - 1)];
+                    // gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY - 1)] = structuredClone(cellDefaultState);
+                    break;
+                case 2:
+                    birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY - 1)];
+                    // gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY - 1)] = structuredClone(cellDefaultState);
+                    break;
+                case 3:
+                    birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY)];
+                    // gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY)] = structuredClone(cellDefaultState);
+                    break;
+                case 4:
+                    birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY)];
+                    // gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY)] = structuredClone(cellDefaultState);
+                    break;
+                case 5:
+                    birthLocation = [this.getWrapAroundVal(theX - 1), this.getWrapAroundVal(theY + 1)];
+                    // gridLayers.gridBack[this.getWrapAroundVal(theX - 1)][this.getWrapAroundVal(theY + 1)] = structuredClone(cellDefaultState);
+                    break;
+                case 6:
+                    birthLocation = [this.getWrapAroundVal(theX), this.getWrapAroundVal(theY + 1)];
+                    // gridLayers.gridBack[this.getWrapAroundVal(theX)][this.getWrapAroundVal(theY + 1)] = structuredClone(cellDefaultState);
+                    break;
+                case 7:
+                    birthLocation = [this.getWrapAroundVal(theX + 1), this.getWrapAroundVal(theY + 1)];
+                    // gridLayers.gridBack[this.getWrapAroundVal(theX + 1)][this.getWrapAroundVal(theY + 1)] = structuredClone(cellDefaultState);
+                    break;
+            }
+            if (animat) {
+                // console.log(theNeighbor);
+                let eatenH = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h;
+                let eatenS = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s;
+                gridLayers.gridBack[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
+                gridLayers.gridFront[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
+                // gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[theX][theY].h;
+
+                gridLayers.gridBack[theX][theY] = structuredClone(cellDefaultState);
+                gridLayers.gridFront[theX][theY] = structuredClone(cellDefaultState);
+                gridLayers.gridBack[birthLocation[0]][birthLocation[1]].alive = true;
+                gridLayers.gridBack[birthLocation[0]][birthLocation[1]].animat = true;
+                gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h + .5 * (eatenH - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h);
+                gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s + .5 * (eatenS - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s);
+                // gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = 300;
+
+            }
+            if (!gridLayers.gridBack[birthLocation[0]][birthLocation[1]].animat && !animat) {
+                gridLayers.gridBack[birthLocation[0]][birthLocation[1]].alive = true;
+                gridLayers.gridFront[birthLocation[0]][birthLocation[1]].alive = true;
+                gridLayers.gridFront[birthLocation[0]][birthLocation[1]].plant = true;
+                // gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = gridLayers.gridFront[theX][theY].s + 1;
+            }
+        } else {
+            birthLocation[0] = theX;
+            birthLocation[1] = theY;
+        }
+
+
         return birthLocation;
     }
 
@@ -423,6 +484,8 @@ class MyAutomata {
                 if (aliveChance > 0.5 && !gridLayers.gridBack[x][y].animat) {
                     gridLayers.gridBack[x][y].alive = true;
                     gridLayers.gridBack[x][y].plant = true;
+                    // gridLayers.gridBack[x][y].h = Math.floor(Math.random() * 360);
+
 
                 } else {
                     gridLayers.gridBack[x][y].alive = structuredClone(cellDefaultState);
@@ -430,7 +493,7 @@ class MyAutomata {
                 if (aliveChanceAnimat > 0.5) {
                     gridLayers.gridBack[x][y].alive = true;
                     gridLayers.gridBack[x][y].animat = true;
-
+                    gridLayers.gridFront[x][y].s = Math.floor(Math.random() * 360);
                 } else {
                     gridLayers.gridBack[x][y].alive = structuredClone(cellDefaultState);
                 }
