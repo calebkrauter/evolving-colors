@@ -18,18 +18,8 @@
 
 <body>
     <div>
-        <H1>Conway's Game Of Life | Implemented by Caleb Krauter</H1>
+        <H1>Evolving Colors Simulation | Implemented by Caleb Krauter</H1>
         <p>Click on a preset then press "Step Through" or "Continue" to run the simulation.</p>
-        <H3>Debug mode is primarily useful for smaller sizes such as 10x10. The yellow outline of the cells in debug<br>
-            mode are from the back grid. This project is implmeneted using a concept known as double buffering where<br>
-            one grid is used to store data and apply rules too and the second grid is used for displaying the
-            updated<br>
-            cells.</H3>
-        <div>Preset A works by building what would be a square but putting one of the living cells on the outside
-            where<br>
-            only dead cells live. All boundary cells are dead. But this tries to make one alive. The output of Preset
-            A<br>
-            TRY IT on the largest size and slowed down!</div>
         <label for="speed">Fast</label>
         <input type="range" id="speed" min="1" max="120" value="1" step="1">
         <label for="speed">Slow</label>
@@ -37,7 +27,6 @@
         <button id="myContinueButton">Continue</button>
         <input type="checkbox" id="debug" checked="false">DEBUG</input>
         <input type="checkbox" id="grid" checked="true">GRID</input>
-        <input type="checkbox" id="chaoticMode" checked="false">DANCING CHAOS MODE</input>
         <input type="checkbox" id="sourSkittlesMode" checked="false">SOUR SKITTLES MODE</input>
 
         <div></div>

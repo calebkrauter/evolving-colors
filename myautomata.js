@@ -67,7 +67,6 @@ class MyAutomata {
         MyAutomata.debug = false;
         MyAutomata.debugBox = document.getElementById("debug");
         MyAutomata.gridBox = document.getElementById("grid");
-        MyAutomata.chaosBox = document.getElementById("chaoticMode");
         MyAutomata.sourSkittlesBox = document.getElementById("sourSkittlesMode");
         MyAutomata.speedSlider = document.getElementById("speed");
         MyAutomata.speedSlider.value = 15;
@@ -78,7 +77,6 @@ class MyAutomata {
         MyAutomata.sourSkittlesMode = false;
         MyAutomata.sourSkittlesBox.checked = false;
         MyAutomata.gridBox.checked = true;
-        MyAutomata.chaosBox.checked = false;
         MyAutomata.enableGrid = true;
         MyAutomata.chaoticMode = false;
         MyAutomata.debugBox.checked = false;
@@ -133,6 +131,26 @@ class MyAutomata {
         gridLayers.gridBack[2][1].alive = true;
         gridLayers.gridBack[3][1].alive = true;
         gridLayers.gridBack[4][1].alive = true;
+
+        gridLayers.gridBack[1][2].plant = true;
+        gridLayers.gridBack[1][3].plant = true;
+        gridLayers.gridBack[1][4].plant = true;
+        gridLayers.gridBack[2][5].plant = true;
+        gridLayers.gridBack[3][5].plant = true;
+        gridLayers.gridBack[4][5].plant = true;
+        gridLayers.gridBack[5][2].plant = true;
+        gridLayers.gridBack[5][3].plant = true;
+        gridLayers.gridBack[5][4].plant = true;
+        gridLayers.gridBack[2][1].plant = true;
+        gridLayers.gridBack[3][1].plant = true;
+        gridLayers.gridBack[4][1].plant = true;
+
+        gridLayers.gridBack[0][1].alive = true;
+        gridLayers.gridBack[1][1].alive = true;
+        gridLayers.gridBack[2][1].alive = true;
+        gridLayers.gridBack[0][1].animat = true;
+        gridLayers.gridBack[1][1].animat = true;
+        gridLayers.gridBack[2][1].animat = true;
     }
 
 
@@ -433,24 +451,26 @@ class MyAutomata {
                     break;
             }
             if (animat) {
-                let eatenH = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h;
-                let eatenS = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s;
-                let plantEnergy = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity;
-                let curAnimatEnergy = gridLayers.gridFront[theX][theY].maturity;
-                gridLayers.gridBack[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
-                gridLayers.gridFront[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
-                // gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[theX][theY].h;
+                if (!gridLayers.gridBack[birthLocation[0]][birthLocation[1]].animat) {
+                    let eatenH = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h;
+                    let eatenS = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s;
+                    let plantEnergy = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity;
+                    let curAnimatEnergy = gridLayers.gridFront[theX][theY].maturity;
+                    gridLayers.gridBack[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
+                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]] = structuredClone(cellDefaultState);
+                    // gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[theX][theY].h;
 
-                gridLayers.gridBack[theX][theY] = structuredClone(cellDefaultState);
-                gridLayers.gridFront[theX][theY] = structuredClone(cellDefaultState);
-                gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h + .5 * (eatenH - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h);
-                gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s + .5 * (eatenS - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s);
-                gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity += curAnimatEnergy;
-                gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity += plantEnergy;
-                if (gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity >= 1000) {
-                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity = 1000;
+                    gridLayers.gridBack[theX][theY] = structuredClone(cellDefaultState);
+                    gridLayers.gridFront[theX][theY] = structuredClone(cellDefaultState);
+                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h + .5 * (eatenH - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].h);
+                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s + .5 * (eatenS - gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s);
+                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity += curAnimatEnergy;
+                    gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity += plantEnergy;
+                    if (gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity >= 1000) {
+                        gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity = 1000;
+                    }
+                    console.log(gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity);
                 }
-                console.log(gridLayers.gridFront[birthLocation[0]][birthLocation[1]].maturity);
 
                 // gridLayers.gridFront[birthLocation[0]][birthLocation[1]].s = 300;
 
@@ -612,9 +632,6 @@ class MyAutomata {
             MyAutomata.enableGrid = MyAutomata.gridBox.checked ? true : false;
 
         })
-        MyAutomata.chaosBox.addEventListener("change", function () {
-            MyAutomata.chaoticMode = MyAutomata.chaosBox.checked ? true : false;
-        });
         MyAutomata.sourSkittlesBox.addEventListener("change", function () {
             MyAutomata.sourSkittlesMode = MyAutomata.sourSkittlesBox.checked ? true : false;
         })
